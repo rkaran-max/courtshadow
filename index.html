@@ -1,0 +1,2668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CourtShadow — Modeling the Shadow of the Court</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- MathJax config (bigger LaTeX) -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]']]
+      },
+      svg: {
+        fontCache: 'global',
+        scale: 1.4
+      }
+    };
+  </script>
+  <script
+    id="MathJax-script"
+    async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+  ></script>
+</head>
+<body>
+  <!-- HEADER / NAV -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <div class="logo">
+        <span class="logo-accent">CourtShadow</span>
+        <span class="logo-sub">CS109 Final Project</span>
+      </div>
+      <nav class="nav">
+        <a href="#overview">Overview</a>
+        <a href="#methods">Methods</a>
+        <a href="#interpretability">Interpretability</a>
+        <a href="#results">Results</a>
+        <a href="#shadow">Shadow</a>
+        <a href="#cases">Cases</a>
+        <a href="#ethics">Ethics</a>
+        <a href="#video">Video</a>
+        <a href="#about">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO / OVERVIEW -->
+    <section id="overview" class="section hero">
+      <!-- animated background layers -->
+      <div class="hero-gradient-layer"></div>
+      <div class="hero-reflection-layer"></div>
+
+      <div class="container hero-grid">
+        <div class="hero-left">
+          <div class="hero-pill">
+            <span class="pill-dot"></span>
+            CourtShadow · CS109
+          </div>
+
+          <h1 class="hero-title">
+            <span class="hero-title-main">CourtShadow</span>
+            <span class="hero-title-sub">
+              Reading what courtrooms leave in the shadows.
+            </span>
+          </h1>
+
+          <p class="hero-subtitle">
+            CourtShadow is a <strong>logistic regression model</strong> trained on
+            thousands of segments from real criminal trial transcripts.
+            It aims to address two critical questions:
+            <br><br>
+            <strong>
+              How do linguistic and case-type patterns in courtroom transcripts differ
+              across cases pre-coded into different defendant groups?
+              <br><br>
+              What might these observations reveal about institutional disparities
+              in the justice system?
+            </strong>
+          </p>
+
+          <div class="hero-buttons">
+            <a href="#methods" class="btn primary-btn">Methods Breakdown &amp; Data</a>
+            <a href="#results" class="btn secondary-btn">Model Evaluation &amp; Results</a>
+          </div>
+
+          <p class="hero-note">
+            CourtShadow does <em>not</em> measure individual prejudice or make legal
+            recommendations. Rather, it surfaces
+            <strong>institutional and procedural patterns</strong>
+            reflected in courtroom language to support further qualitative and legal analysis.
+          </p>
+        </div>
+
+        <div class="hero-right">
+          <div class="hero-card hero-card-main floating-card reveal-on-scroll">
+            <div class="hero-card-header">
+              <span class="hero-card-label">Project snapshot</span>
+              <span class="hero-card-badge">Interpretability-first</span>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric">
+                <div class="metric-label">Transcripts</div>
+                <div class="metric-value">42</div>
+                <div class="metric-caption">train + test</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Segments</div>
+                <div class="metric-value">1,915</div>
+                <div class="metric-caption">chunked transcript units</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Accuracy</div>
+                <div class="metric-value">87.5%</div>
+                <div class="metric-caption">case-level on test set</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">ROC AUC</div>
+                <div class="metric-value">0.95</div>
+                <div class="metric-caption">discrimination</div>
+              </div>
+            </div>
+
+            <div class="hero-mini-caption">
+              <span class="pill-soft">Case-level view</span>
+              <span>
+                Linguistic Environment Scores decomposed into text, context, and role features.
+              </span>
+            </div>
+          </div>
+
+          <!-- MATCHING GRADIENT CARD FOR "What CourtShadow reveals" -->
+          <div class="hero-card hero-card-main floating-card delay-1 reveal-on-scroll">
+            <div class="hero-card-header">
+              <span class="hero-card-label">What CourtShadow reveals</span>
+              <span class="hero-card-badge">Institutional Signals</span>
+            </div>
+            <ul class="nice-list compact">
+              <li>Institutional differences across defendant groups</li>
+              <li>How speaker roles shape patterns</li>
+              <li>Cases with strongest environment scores</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- METHODS -->
+    <section id="methods" class="section reveal-on-scroll">
+      <div class="container">
+
+        <!-- Fancy methods header -->
+        <div class="methods-header">
+          <div class="methods-kicker">Methods</div>
+          <h2>Data &amp; Methods</h2>
+          <p class="section-lead methods-lead">
+            CourtShadow combines manually collected criminal trial transcripts with case-level
+            group coding. Each transcript is transformed into a sequence of linguistically
+            interpretable segments, featurized, and passed through a logistic regression model
+            to produce case-level <strong>Linguistic Environment Scores</strong>.
+          </p>
+        </div>
+
+        <!-- METHODS CARDS GRID WRAPPER (for spacing) -->
+        <div class="methods-cards-grid">
+          <!-- DATASET (full-width card) -->
+          <div class="card methods-card">
+            <div class="methods-subtitle">Dataset construction</div>
+            <h3>Dataset construction</h3>
+            <ul class="nice-list">
+              <li>Collected <strong>42</strong> publicly-available criminal trial transcripts.</li>
+              <li>Applied case-level group coding (POC-coded vs white-coded) using external research sources.</li>
+              <li>Split transcripts into smaller <strong>linguistic segments</strong> based on speaker turns and text length.</li>
+              <li>Merged in speaker roles (judge, prosecutor, defense, witness, defendant).</li>
+            </ul>
+          </div>
+
+          <!-- PIPELINE (full-width card) -->
+          <div class="card methods-card">
+            <div class="methods-subtitle">Modeling the environment</div>
+            <h3>Model pipeline</h3>
+            <p class="pipeline-lead">
+              CourtShadow trains a <strong>logistic regression model</strong> on individual
+              transcript segments. Each segment is mapped to a probability that it comes
+              from a case <strong>pre-coded as POC-coded vs white-coded</strong>. These
+              segment scores are then aggregated into case-level
+              <strong>Linguistic Environment Scores</strong> and decomposed by feature family.
+            </p>
+
+            <div class="pipeline-card">
+              <div class="pipeline-flow">
+
+                <!-- Step 1 -->
+                <div class="pipeline-step">
+                  <div class="pipeline-step-number">1</div>
+                  <h4 class="pipeline-step-title">Chunk transcripts</h4>
+                  <p class="pipeline-step-body">
+                    Split each trial transcript into smaller <strong>segments</strong> based on
+                    speaker turns and length constraints.
+                  </p>
+                </div>
+
+                <div class="pipeline-arrow" aria-hidden="true">➜</div>
+
+                <!-- Step 2 -->
+                <div class="pipeline-step">
+                  <div class="pipeline-step-number">2</div>
+                  <h4 class="pipeline-step-title">Featurize segments</h4>
+                  <p class="pipeline-step-body">
+                    Turn each segment into a 38-dimensional feature vector capturing
+                    <strong>text, speaker roles, and contextual structure</strong>.
+                  </p>
+                </div>
+
+                <div class="pipeline-arrow" aria-hidden="true">➜</div>
+
+                <!-- Step 3 -->
+                <div class="pipeline-step">
+                  <div class="pipeline-step-number">3</div>
+                  <h4 class="pipeline-step-title">Train logistic regression</h4>
+                  <p class="pipeline-step-body">
+                    Fit a <strong>segment-level logistic regression classifier</strong> using
+                    only training cases with known group coding.
+                  </p>
+                </div>
+
+                <div class="pipeline-arrow" aria-hidden="true">➜</div>
+
+                <!-- Step 4 -->
+                <div class="pipeline-step">
+                  <div class="pipeline-step-number">4</div>
+                  <h4 class="pipeline-step-title">Predict on test cases</h4>
+                  <p class="pipeline-step-body">
+                    Generate <strong>segment-level probabilities</strong> for held-out test
+                    cases, treating group coding as the target label.
+                  </p>
+                </div>
+
+                <div class="pipeline-arrow" aria-hidden="true">➜</div>
+
+                <!-- Step 5 -->
+                <div class="pipeline-step">
+                  <div class="pipeline-step-number">5</div>
+                  <h4 class="pipeline-step-title">Aggregate &amp; decompose</h4>
+                  <p class="pipeline-step-body">
+                    Aggregate segment predictions into <strong>case-level bias scores</strong>
+                    and decompose contributions by feature family (text, context, roles/meta).
+                  </p>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Animated transcript-to-model strip -->
+        <div class="methods-animation-band reveal-on-scroll">
+          <div class="methods-animation-inner">
+
+            <div class="methods-rail-label">
+              <span class="methods-pill">From transcript to score</span>
+              <p class="methods-rail-text">
+                The model never sees race directly. It only reads
+                <strong>who speaks, how they speak, and what is on the record</strong> —
+                then learns which environments tend to belong to POC-coded vs white-coded cases.
+              </p>
+            </div>
+
+            <div class="methods-rail">
+              <!-- Left: raw transcript snippets -->
+              <div class="methods-column methods-column--left">
+                <div class="methods-column-title">Transcript segments</div>
+
+                <div class="transcript-stream">
+                  <div class="transcript-line is-judge">
+                    <span class="role-tag">JUDGE</span>
+                    <span class="line-text">“Mr. Smith, when did you first see the firearm?”</span>
+                  </div>
+                  <div class="transcript-line is-prosecutor">
+                    <span class="role-tag">PROSECUTOR</span>
+                    <span class="line-text">“He clearly knew what he was doing that night.”</span>
+                  </div>
+                  <div class="transcript-line is-defense">
+                    <span class="role-tag">DEFENSE</span>
+                    <span class="line-text">“Your Honor, given his background and remorse, we ask for leniency.”</span>
+                  </div>
+                  <div class="transcript-line is-witness">
+                    <span class="role-tag">WITNESS</span>
+                    <span class="line-text">“I saw officers recover a firearm and narcotics from the car.”</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Middle: feature extraction chips -->
+              <div class="methods-column methods-column--middle">
+                <div class="methods-column-title">Segment features</div>
+
+                <div class="methods-chip-row">
+                  <span class="methods-chip chip-length">tokens = 32</span>
+                  <span class="methods-chip chip-structure">sentences = 1</span>
+                  <span class="methods-chip chip-questions">question_marks = 1</span>
+                </div>
+
+                <div class="methods-chip-row">
+                  <span class="methods-chip chip-framing">politeness ↑</span>
+                  <span class="methods-chip chip-framing">mitigation ↑</span>
+                  <span class="methods-chip chip-framing-negative">harshness ↓</span>
+                </div>
+
+                <div class="methods-chip-row">
+                  <span class="methods-chip chip-pronouns">first-person rate</span>
+                  <span class="methods-chip chip-pronouns">second-person rate</span>
+                </div>
+
+                <div class="methods-chip-row">
+                  <span class="methods-chip chip-topic">weapons topic</span>
+                  <span class="methods-chip chip-topic">drugs topic</span>
+                  <span class="methods-chip chip-topic">police interaction</span>
+                </div>
+              </div>
+
+              <!-- Right: model outputs -->
+              <div class="methods-column methods-column--right">
+                <div class="methods-column-title">Model signal</div>
+
+                <div class="methods-output-card model-signal-box">
+                  <div class="methods-output-header">
+                    <span class="methods-output-tag">Segment-level</span>
+                    <span class="methods-output-score">P(Group = POC-coded) = 0.78</span>
+                  </div>
+                  <p class="methods-output-text">
+                    Segment scores are averaged and adjusted across all segments in a case to produce
+                    a <strong>Linguistic Environment Score</strong> at the case level.
+                  </p>
+                  <div class="methods-output-footer">
+                    <span class="methods-output-badge">No race tokens used as inputs</span>
+                    <span class="methods-output-badge">Interpretability-first logistic regression</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- FEATURE FAMILIES CARD -->
+        <div class="card features-card reveal-on-scroll">
+          <div class="methods-subtitle">Feature families</div>
+          <h3>Feature families</h3>
+          <p class="small-muted">
+            CourtShadow uses 38 linguistically interpretable features per segment. Use the tabs to flip through how each family works, with examples and rationale.
+          </p>
+
+          <!-- Tabs -->
+          <div class="feature-tabs">
+            <button class="feature-tab active" data-feature-tab="overview">Overview</button>
+            <button class="feature-tab" data-feature-tab="length">Length &amp; structure</button>
+            <button class="feature-tab" data-feature-tab="framing">Discursive framing</button>
+            <button class="feature-tab" data-feature-tab="pronouns">Pronouns &amp; voice</button>
+            <button class="feature-tab" data-feature-tab="topics">Topic indicators</button>
+          </div>
+
+          <!-- Slides -->
+          <div class="feature-slides">
+
+            <!-- Slide 1: Overview with animated bar graph -->
+            <div class="feature-slide active" data-feature-slide="overview">
+              <div class="feature-slide-grid">
+                <div>
+                  <h4>Feature overview</h4>
+                  <p>
+                    Each segment is converted into a compact vector of 38 features that capture style, stance,
+                    and criminal context. To prevent data leakage, group labels are used only as
+                    the target during training and never as inputs to the model.
+                  </p>
+
+                  <ul class="nice-list compact feature-list-clean">
+                    <li>
+                      <div class="feature-list-title feature-key feature-key-length">
+                        Length &amp; structure (3)
+                      </div>
+                      <div class="feature-list-desc">
+                        How long the segment is, and how it’s punctuated.
+                      </div>
+                    </li>
+
+                    <li>
+                      <div class="feature-list-title feature-key feature-key-framing">
+                        Discursive framing (10)
+                      </div>
+                      <div class="feature-list-desc">
+                        Politeness, harshness, mitigation, certainty, uncertainty (totals + rates).
+                      </div>
+                    </li>
+
+                    <li>
+                      <div class="feature-list-title feature-key feature-key-pronouns">
+                        Pronouns &amp; voice (4)
+                      </div>
+                      <div class="feature-list-desc">
+                        First- vs. second-person usage.
+                      </div>
+                    </li>
+
+                    <li>
+                      <div class="feature-list-title feature-key feature-key-topics">
+                        Topic indicators (21)
+                      </div>
+                      <div class="feature-list-desc">
+                        Binary flags for crime/context keywords (guns, drugs, fraud, police, injury, etc.).
+                      </div>
+                    </li>
+                  </ul>
+
+                  <p class="small-muted">
+                    Together, these families let CourtShadow focus on how cases are structured and described,
+                    rather than on any explicit mention of group identity.
+                  </p>
+                </div>
+
+                <!-- Animated bar chart: counts + labels -->
+                <div class="feature-bars">
+                  <div class="feature-bar" data-count="3">
+                    <div class="feature-bar-inner">
+                      <span class="feature-bar-count">3</span>
+                    </div>
+                    <span class="feature-bar-label">Length</span>
+                  </div>
+
+                  <div class="feature-bar" data-count="10">
+                    <div class="feature-bar-inner">
+                      <span class="feature-bar-count">10</span>
+                    </div>
+                    <span class="feature-bar-label">Framing</span>
+                  </div>
+
+                  <div class="feature-bar" data-count="4">
+                    <div class="feature-bar-inner">
+                      <span class="feature-bar-count">4</span>
+                    </div>
+                    <span class="feature-bar-label">Pronouns</span>
+                  </div>
+
+                  <div class="feature-bar" data-count="21">
+                    <div class="feature-bar-inner">
+                      <span class="feature-bar-count">21</span>
+                    </div>
+                    <span class="feature-bar-label">Topics</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 2: Length & structure -->
+            <div class="feature-slide feature-slide--length" data-feature-slide="length">
+              <div class="feature-slide-grid">
+                <div>
+                  <h4>Length &amp; structure (3 features)</h4>
+                  <p>
+                    These features capture how dense and structurally complex each segment is. They
+                    don’t look at <em>what</em> is being said, but <em>how</em> it is packaged in the transcript:
+                  </p>
+                  <ul class="nice-list compact">
+                    <li>
+                      <strong>chunk_tokens</strong> — number of word tokens in the segment
+                      (rough length of the turn).
+                    </li>
+                    <li>
+                      <strong>chunk_sentences</strong> — approximate sentence count, using
+                      <code>.</code>, <code>!</code>, and <code>?</code> as boundaries.
+                    </li>
+                    <li>
+                      <strong>chunk_question_marks</strong> — number of question marks, as a proxy
+                      for direct questioning.
+                    </li>
+                  </ul>
+
+                  <div class="length-examples">
+                    <div class="length-example">
+                      <p class="example-title">Short Q&amp;A turn</p>
+                      <p class="example-quote">
+                        “Mr. Smith, when did you first see the firearm?”
+                      </p>
+                      <p class="example-metrics">
+                        <span><strong>tokens</strong>: 9</span>
+                        <span><strong>sentences</strong>: 1</span>
+                        <span><strong>questions</strong>: 1</span>
+                      </p>
+                    </div>
+
+                    <div class="length-example">
+                      <p class="example-title">Longer narrative turn</p>
+                      <p class="example-quote">
+                        “I went to the store, talked to the clerk, and then drove home before the
+                        officers arrived.”
+                      </p>
+                      <p class="example-metrics">
+                        <span><strong>tokens</strong>: 32</span>
+                        <span><strong>sentences</strong>: 1</span>
+                        <span><strong>questions</strong>: 0</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <p class="small-muted length-note">
+                    CourtShadow doesn’t “read” these as stories. It treats them as structured turns
+                    whose lengths and punctuation patterns help signal presentation style.
+                  </p>
+                </div>
+
+                <div>
+                  <div class="length-sidecard">
+                    <p class="small-muted">
+                      <strong>Why include this family?</strong><br />
+                      Prior work on courtroom presentation shows that the way speech is structured —
+                      how long a witness or lawyer talks, and how often they ask questions — can signal
+                      control, pressure, and credibility. These simple length and punctuation features
+                      let CourtShadow pick up on that structural side of the transcript without using
+                      any information about defendant identity.
+                    </p>
+
+                    <div class="feature-cta">
+                      <p class="feature-cta-label">Want to dig into the theory?</p>
+                      <a href="https://www.researchgate.net/publication/230875821_Order_in_Court" target="_blank" class="feature-cta-link">
+                        <span>Read more in related work</span>
+                        <span class="feature-cta-arrow">↗</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 3: Discursive framing -->
+            <div class="feature-slide feature-slide--framing" data-feature-slide="framing">
+              <div class="feature-slide-grid">
+                <div>
+                  <h4>Discursive framing (10 features)</h4>
+                  <p>
+                    These features track how segments frame people and events using politeness,
+                    harshness, mitigation, and (un)certainty:
+                  </p>
+                  <ul class="nice-list compact">
+                    <li><strong>Politeness:</strong> counts and rates of words like “please”, “sir”, “your honor”.</li>
+                    <li><strong>Harshness:</strong> words like “liar”, “dangerous”, “criminal”.</li>
+                    <li><strong>Mitigation:</strong> “background”, “circumstances”, “remorse”, “treatment”, “nonviolent”.</li>
+                    <li><strong>Certainty / uncertainty:</strong> “clearly”, “obviously” vs. “maybe”, “might”, “unclear”.</li>
+                  </ul>
+
+                  <!-- Visual examples -->
+                  <div class="feature-visual feature-visual-framing">
+                    <div class="length-example">
+                      <p class="example-title">Polite / mitigating</p>
+                      <p class="example-quote">
+                        “<span class="token-polite">Your Honor</span>, given his
+                        <span class="token-mitigate">background</span> and
+                        <span class="token-mitigate">remorse</span>, we ask for leniency.”
+                      </p>
+                      <p class="example-metrics">
+                        <span>politeness ↑</span>
+                        <span>mitigation ↑</span>
+                        <span>harshness ↓</span>
+                      </p>
+                    </div>
+
+                    <div class="length-example">
+                      <p class="example-title">Harsh / certain</p>
+                      <p class="example-quote">
+                        “He is a <span class="token-harsh">dangerous criminal</span> who
+                        <span class="token-certain">clearly</span> knew what he was doing.”
+                      </p>
+                      <p class="example-metrics">
+                        <span>harshness ↑</span>
+                        <span>certainty ↑</span>
+                        <span>politeness ↓</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <p class="small-muted">
+                    CourtShadow doesn’t decide which framing is “right” — it simply notes
+                    how often different framings appear across cases.
+                  </p>
+                </div>
+
+                <div>
+                  <div class="length-sidecard">
+                    <p class="small-muted">
+                      <strong>Why include this family?</strong><br />
+                      Research on legal and courtroom discourse shows that politeness,
+                      impoliteness, and hedging strategies are central to how power, stance,
+                      and credibility are negotiated in trials. Framing features let CourtShadow
+                      summarize whether segments tend to soften, intensify, or justify the
+                      way defendants and events are described.
+                    </p>
+
+                    <div class="feature-cta">
+                      <p class="feature-cta-label">Want to dig into the theory?</p>
+                      <a href="https://books.google.com/books?hl=en&lr=&id=0p2HDAAAQBAJ&oi=fnd&pg=PP1&dq=Cotterill+(2003).+Language+and+Power+in+Court:+A+Linguistic+Analysis+of+the+O.J.+Simpson+Trial.&ots=X7CF8t9o5L&sig=7OTthSyo4PwmUGLxSosXfGKJF74#v=onepage&q=Cotterill%20(2003).%20Language%20and%20Power%20in%20Court%3A%20A%20Linguistic%20Analysis%20of%20the%20O.J.%20Simpson%20Trial.&f=false" target="_blank" class="feature-cta-link">
+                        <span>Read more in related work</span>
+                        <span class="feature-cta-arrow">↗</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 4: Pronouns & voice -->
+            <div class="feature-slide feature-slide--pronouns" data-feature-slide="pronouns">
+              <div class="feature-slide-grid">
+                <div>
+                  <h4>Pronouns &amp; voice (4 features)</h4>
+                  <p>
+                    These features count first- and second-person pronouns and normalize by segment length:
+                  </p>
+                  <ul class="nice-list compact">
+                    <li><strong>first_person_total / rate:</strong> “I, me, my, we, our…”</li>
+                    <li><strong>second_person_total / rate:</strong> “you, your, yours…”</li>
+                  </ul>
+
+                  <!-- Visual examples -->
+                  <div class="feature-visual feature-visual-pronouns">
+                    <div class="length-example">
+                      <p class="example-title">Defendant voice</p>
+                      <p class="example-quote">
+                        “<span class="token-first">I</span> didn’t think
+                        <span class="token-first">I</span> was doing anything wrong.”
+                      </p>
+                      <p class="example-metrics">
+                        <span>first-person rate ↑</span>
+                        <span>second-person rate ↓</span>
+                      </p>
+                    </div>
+
+                    <div class="length-example">
+                      <p class="example-title">Prosecutor voice</p>
+                      <p class="example-quote">
+                        “<span class="token-second">You</span> had multiple chances to comply,
+                        and <span class="token-second">you</span> chose not to.”
+                      </p>
+                      <p class="example-metrics">
+                        <span>second-person rate ↑</span>
+                        <span>first-person rate ↓</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <p class="small-muted">
+                    CourtShadow uses these pronoun patterns, combined with speaker roles,
+                    as one way of capturing who is being centered or addressed in the discourse.
+                  </p>
+                </div>
+
+                <div>
+                  <div class="length-sidecard">
+                    <p class="small-muted">
+                      <strong>Why include this family?</strong><br />
+                      Studies of pronoun use in institutional and courtroom discourse show that “I / we / you”
+                      choices are tightly linked to power, alignment, and “othering”. Pronoun rates help CourtShadow
+                      summarize whose perspective dominates different segments and who is being directly addressed.
+                    </p>
+
+                    <div class="feature-cta">
+                      <p class="feature-cta-label">Want to dig into the theory?</p>
+                      <a href="https://www.sciencedirect.com/science/article/abs/pii/S0262407911621672" target="_blank" class="feature-cta-link">
+                        <span>Read more in related work</span>
+                        <span class="feature-cta-arrow">↗</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slide 5: Topic indicators -->
+            <div class="feature-slide feature-slide--topics" data-feature-slide="topics">
+              <div class="feature-slide-grid">
+                <div>
+                  <h4>Topic indicators (21 features)</h4>
+                  <p>
+                    These are binary features that fire when a segment contains keywords tied to common
+                    criminal-legal contexts:
+                  </p>
+                  <ul class="nice-list compact">
+                    <li><strong>Violence &amp; weapons:</strong> guns, firearms, knives, shooting, killing, assault, murder, manslaughter.</li>
+                    <li><strong>Police interaction:</strong> police, officer, cop, flee, arrest, comply, resist.</li>
+                    <li><strong>Financial crime:</strong> fraud, scheme, investment, bank, account, wire transfer.</li>
+                    <li><strong>Drugs:</strong> drugs, narcotics, cocaine, heroin, meth.</li>
+                    <li><strong>Harm &amp; injury:</strong> victim, injury, hospital.</li>
+                  </ul>
+
+                  <!-- Visual example -->
+                  <div class="feature-visual feature-visual-topics">
+                    <div class="length-example">
+                      <p class="example-title">Example segment</p>
+                      <p class="example-quote">
+                        “Officers recovered a <span class="token-topic-weapon">firearm</span> and
+                        <span class="token-topic-drug">narcotics</span> from the vehicle after the
+                        <span class="token-topic-police">traffic stop</span>.”
+                      </p>
+                      <p class="example-metrics">
+                        <span>Weapons topic: on</span>
+                        <span>Drugs topic: on</span>
+                        <span>Police interaction: on</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <p class="small-muted">
+                    Each topic feature is a simple on/off flag, but aggregated across thousands of
+                    segments it helps show which kinds of criminal contexts dominate different cases.
+                  </p>
+                </div>
+
+                <div>
+                  <div class="length-sidecard">
+                    <p class="small-muted">
+                      <strong>Why include this family?</strong><br />
+                      Prior work in sentencing and disparity research shows that charge type and add-on offenses
+                      (e.g., drug, weapons, resisting arrest) are strongly tied to outcomes. Topic indicators let
+                      CourtShadow control for these case-type differences when interpreting linguistic patterns.
+                    </p>
+
+                    <div class="feature-cta">
+                      <p class="feature-cta-label">Want to dig into the theory?</p>
+                      <a href="https://www.ussc.gov/about/annual-report-2022" target="_blank" class="feature-cta-link">
+                        <span>Read more in related work</span>
+                        <span class="feature-cta-arrow">↗</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div> <!-- end .feature-slides -->
+        </div> <!-- end .features-card -->
+
+      </div>
+
+      <!-- MATH SNAPSHOT -->
+      <section class="math-snapshot reveal-on-scroll">
+        <div class="card math-card">
+          <div class="methods-subtitle">Mathematical snapshot</div>
+          <h3>Mathematical snapshot</h3>
+          <p class="section-lead small-muted">
+            A high-level overview of the probabilistic and optimization framework behind CourtShadow’s
+            segment-level classifier and case-level aggregation.
+          </p>
+
+          <!-- Grid -->
+          <div class="math-grid">
+
+            <!-- Bernoulli model -->
+            <div class="math-block">
+              <h4>Bernoulli modeling</h4>
+              <p>
+                Each segment label \( y_i \in \{0,1\} \) is treated as a Bernoulli random variable indicating
+                whether segment \(i\) comes from a case pre-coded into Group&nbsp;1 (e.g., POC-coded) or Group&nbsp;0 (white-coded).
+                The model estimates a probability:
+                \[
+                p_i = P(y_i = 1 \mid x_i),
+                \]
+                where \(x_i\) is the 38-dimensional feature vector for segment \(i\).
+                This defines the Bernoulli likelihood:
+                \[
+                L(\theta) = \prod_{i=1}^{n} p_i^{y_i}(1 - p_i)^{1-y_i}.
+                \]
+              </p>
+            </div>
+
+            <!-- Logistic regression -->
+            <div class="math-block">
+              <h4>Logistic regression</h4>
+              <p>
+                CourtShadow uses a logistic link function to map features to probabilities:
+                \[
+                p_i = \sigma(\theta^\top x_i) = \frac{1}{1 + e^{-\theta^\top x_i}}.
+                \]
+                Training minimizes the negative log-likelihood (cross-entropy) loss:
+                \[
+                J(\theta) =
+                -\sum_{i=1}^{n} \left(y_i \log p_i + (1-y_i)\log(1-p_i)\right),
+                \]
+                with gradient:
+                \[
+                \nabla_\theta J(\theta) = \sum_{i=1}^n (p_i - y_i)x_i.
+                \]
+              </p>
+            </div>
+
+            <!-- Case-level -->
+            <div class="math-block">
+              <h4>Case-level aggregation</h4>
+              <p>
+                For each case, segment-level probabilities are aggregated into a single case-level
+                Linguistic Environment Score:
+                \[
+                \bar{p}_{\text{case}} = \frac{1}{m}\sum_{j=1}^m p_j,
+                \]
+                where \(m\) is the number of segments in that case.
+                To understand how different feature families contribute, the log-odds are decomposed as:
+                \[
+                \theta^\top x = \sum_{k \in \text{family}} \theta_k x_k,
+                \]
+                which lets us summarize how text, context, and roles/meta each push the score up or down.
+              </p>
+            </div>
+
+            <!-- Diagnostics -->
+            <div class="math-block">
+              <h4>Model evaluation</h4>
+              <p>
+                The Receiver Operating Characteristic (ROC) area under the curve (AUC) measures the model’s
+                ranking ability:
+                \[
+                \text{AUC} = P(\text{score}_{\text{positive}} > \text{score}_{\text{negative}}),
+                \]
+                i.e., the probability that a randomly chosen positive case (Group&nbsp;1) receives a higher
+                score than a randomly chosen negative case (Group&nbsp;0).
+                Calibration is assessed by comparing predicted probabilities to empirical frequencies via a
+                reliability curve:
+                \[
+                \text{reliability}(\text{bin}) = \mathbb{E}[Y \mid \hat{p} \in \text{bin}],
+                \]
+                where \(\hat{p}\) are the predicted probabilities grouped into bins.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- INTERPRETABILITY SECTION -->
+        <!-- INTERPRETABILITY SECTION -->
+    <section id="interpretability" class="section section-muted reveal-on-scroll">
+      <div class="container">
+        <h2>What drives CourtShadow’s scores?</h2>
+        <p class="section-lead">
+            CourtShadow uses logistic regression, allowing for each prediction to be decomposed into
+          <strong>feature-level contributions</strong>. For the eight held-out test cases, I use this
+          structure to explain which feature families push a case toward higher or lower
+          <strong>Linguistic Environment Scores (LES)</strong>.
+        </p>
+
+        <div class="interpret-grid">
+          <!-- POC-coded example: The Wilmington Ten -->
+            <div class="card interpret-card floating-card">
+              <div class="interpret-header">
+                <span class="interpret-kicker">High-LES POC-coded case</span>
+                <h3 class="interpret-title">The Wilmington Ten</h3>
+                <p class="interpret-subtitle">
+                  A held-out test case with a very high LES:
+                  <strong>P(Group = POC-coded) ≈ 0.90–0.98</strong>.
+                  The model is highly confident that its environment resembles POC-coded cases in the training data.
+                </p>
+              </div>
+
+              <!-- IMAGE FLOAT + LINKS UNDER IMAGE -->
+              <div class="interpret-meta">
+                <div class="interpret-image-wrapper">
+                  <img
+                    src="wilmington-ten.png"
+                    alt="Connie Tyndall, one of the Wilmington Ten, in prison in Wagram, North Carolina (1976)"
+                    class="interpret-image"
+                  />
+                  <p class="image-credit small-muted">
+                    Connie Tyndall, one of the Wilmington Ten, in prison in Wagram, North Carolina (1976).
+                    Photo by Nancy Shia, via Wikimedia Commons, licensed under CC BY-SA 4.0.
+                  </p>
+
+                  <h4 class="interpret-links-heading">Learn more about this case</h4>
+                  <ul class="nice-list compact interpret-links">
+                    <li>
+                      <a
+                        href="https://www.ncpedia.org/anchor/wilmington-ten"
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        Historical overview of the Wilmington Ten ↗
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://www.justice.gov/crt/transcripts-casestate-north-carolina-v-benjamin-franklin-chavis-marvin-patrick-connie-tyndall-et"
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        Access the court transcripts here ↗
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- TEXT THAT WRAPS AROUND IMAGE -->
+                <div class="interpret-meta-text">
+                  <p class="small-muted">
+                    <strong>Case snapshot.</strong> A group of civil rights activists prosecuted in
+                    Wilmington, North Carolina, in the early 1970s on arson and conspiracy charges
+                    linked to local protests.
+                  </p>
+                  <p class="small-muted">
+                    <strong>Group coding.</strong> POC-coded (Black defendants), used as a
+                    high-LES example in this project.
+                  </p>
+                </div>
+              </div>
+
+              <div class="interpret-body">
+                <p>
+                  At the <em>segment</em> level, CourtShadow assigns scores to each turn of talk. For
+                  this case, I average contributions across all segments to obtain a
+                  <strong>case-level explanation</strong> of its LES.
+                </p>
+
+                <div class="interpret-feature-stack">
+                  <div class="interpret-feature-row">
+                    <div class="interpret-feature-label">Structure</div>
+                    <div class="interpret-feature-bar" data-value="0.9">
+                      <div class="interpret-feature-bar-inner"></div>
+                    </div>
+                    <p class="interpret-feature-caption">
+                      Long, multi-sentence segments with frequent questioning patterns
+                      push this case <strong>toward higher LES</strong>.
+                    </p>
+                  </div>
+
+                  <div class="interpret-feature-row">
+                    <div class="interpret-feature-label">Framing</div>
+                    <div class="interpret-feature-bar" data-value="0.75">
+                      <div class="interpret-feature-bar-inner"></div>
+                    </div>
+                    <p class="interpret-feature-caption">
+                      Elevated <strong>politeness</strong>, <strong>harshness</strong>, and
+                      <strong>mitigation</strong> rates contribute positive log-odds, signaling
+                      a charged rhetorical environment.
+                    </p>
+                  </div>
+
+                  <div class="interpret-feature-row">
+                    <div class="interpret-feature-label">Topics</div>
+                    <div class="interpret-feature-bar" data-value="0.8">
+                      <div class="interpret-feature-bar-inner"></div>
+                    </div>
+                    <p class="interpret-feature-caption">
+                      Topic flags for <strong>injury</strong>, <strong>assault</strong>,
+                      <strong>drugs</strong>, and <strong>police interaction</strong> set this case
+                      in a high-stakes criminal context that resembles POC-coded training cases.
+                    </p>
+                  </div>
+
+                  <div class="interpret-feature-row">
+                    <div class="interpret-feature-label">Pronouns &amp; address</div>
+                    <div class="interpret-feature-bar" data-value="0.6">
+                      <div class="interpret-feature-bar-inner"></div>
+                    </div>
+                    <p class="interpret-feature-caption">
+                      Frequent <strong>second-person address</strong> (“you”) and moderate use of
+                      first-person voice also push the score upward, reflecting who is being
+                      directly addressed in the record.
+                    </p>
+                  </div>
+                </div>
+
+                <p class="small-muted">
+                  In combination, these feature families yield a case whose overall structure, topics,
+                  and framing look much more like POC-coded environments in the training data than
+                  white-coded ones.
+                </p>
+              </div>
+            </div>
+
+        <!-- White-coded example: United States v. Cohen -->
+        <div class="card interpret-card floating-card">
+          <div class="interpret-header">
+            <span class="interpret-kicker">Low-LES white-coded case</span>
+            <h3 class="interpret-title">United States v. Cohen</h3>
+            <p class="interpret-subtitle">
+              A held-out test case with a lower LES:
+              <strong>P(Group = POC-coded) ≈ 0.32</strong>.
+              The model reads its environment as closer to white-coded cases.
+            </p>
+          </div>
+
+          <!-- IMAGE FLOAT + LINKS UNDER IMAGE -->
+          <div class="interpret-meta">
+            <div class="interpret-image-wrapper">
+              <img
+                src="cohen-case.png"
+                alt="Michael D. Cohen, former personal attorney to Donald Trump"
+                class="interpret-image"
+              />
+              <p class="image-credit small-muted">
+                Michael D. Cohen, former personal attorney to Donald Trump.
+                Photo by IowaPolitics.com, via Wikimedia Commons, licensed under CC BY-SA 2.0.
+              </p>
+
+              <h4 class="interpret-links-heading">Learn more about this case</h4>
+              <ul class="nice-list compact interpret-links">
+                <li>
+                  <a
+                    href="https://www.justice.gov/usao-sdny/pr/michael-cohen-sentenced-3-years-prison"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    Overview of United States v. Cohen ↗
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href=https://int.nyt.com/data/documenthelper/501-michael-cohen-court-transcript/ddd84d2b0f5a3425ebc5/optimized/full.pdf
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    Access a court transcript example here ↗
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <!-- TEXT THAT WRAPS AROUND IMAGE -->
+            <div class="interpret-meta-text">
+              <p class="small-muted">
+                <strong>Case snapshot.</strong> Federal prosecution of Michael Cohen on
+                financial and campaign-finance-related offenses, including payments
+                made during the 2016 election cycle.
+              </p>
+              <p class="small-muted">
+                <strong>Group coding.</strong> White-coded defendant, used as a
+                low-LES example in this project.
+              </p>
+            </div>
+          </div>
+
+          <div class="interpret-body">
+            <p>
+              Using the same decomposition, I aggregate feature contributions for
+              <em>United States v. Cohen</em>. Here, some features push upward toward POC-coded,
+              while others <strong>pull the score down</strong>, toward white-coded environments.
+            </p>
+
+            <div class="interpret-feature-stack">
+              <div class="interpret-feature-row">
+                <div class="interpret-feature-label">Structure</div>
+                <div class="interpret-feature-bar" data-value="0.25">
+                  <div class="interpret-feature-bar-inner"></div>
+                </div>
+                <p class="interpret-feature-caption">
+                  A large number of <strong>question marks</strong> and dense Q&amp;A turns
+                  contribute <em>negatively</em>, pulling the LES toward the white-coded side.
+                </p>
+              </div>
+
+              <div class="interpret-feature-row">
+                <div class="interpret-feature-label">Framing</div>
+                <div class="interpret-feature-bar" data-value="0.35">
+                  <div class="interpret-feature-bar-inner"></div>
+                </div>
+                <p class="interpret-feature-caption">
+                  Totals for <strong>politeness</strong> and <strong>harshness</strong> act
+                  in the opposite direction from their rates, illustrating that the same family
+                  can push toward either group depending on how it appears across segments.
+                </p>
+              </div>
+
+              <div class="interpret-feature-row">
+                <div class="interpret-feature-label">Topics</div>
+                <div class="interpret-feature-bar" data-value="0.45">
+                  <div class="interpret-feature-bar-inner"></div>
+                </div>
+                <p class="interpret-feature-caption">
+                  Keywords for <strong>drugs</strong>, <strong>weapons</strong>,
+                  and <strong>financial crime</strong> do appear, but in this case their
+                  contributions are often offset by structural and framing cues that pull the
+                  LES downward.
+                </p>
+              </div>
+
+              <div class="interpret-feature-row">
+                <div class="interpret-feature-label">Pronouns &amp; address</div>
+                <div class="interpret-feature-bar" data-value="0.3">
+                  <div class="interpret-feature-bar-inner"></div>
+                </div>
+                <p class="interpret-feature-caption">
+                  Second-person totals push modestly toward POC-coded, but
+                  <strong>second-person rates</strong> and other features counteract this,
+                  contributing to a lower overall LES.
+                </p>
+              </div>
+            </div>
+
+            <p class="small-muted">
+              The result is a case that still involves serious topics, but whose overall pattern of
+              structure, pronouns, and framing resembles white-coded training cases more than
+              POC-coded ones.
+            </p>
+          </div>
+        </div>
+
+
+
+        <div class="card interpret-summary-card">
+          <h3>Patterns across all test cases</h3>
+          <ul class="nice-list">
+            <li>
+              <strong>Recurrent families.</strong> Across all eight test cases,
+              structural features (length, sentences, questions), framing features
+              (politeness, harshness, mitigation), topic indicators (weapons, drugs,
+              fraud, injury, police), and pronoun patterns repeatedly appear among the
+              top contributors.
+            </li>
+            <li>
+              <strong>No single “magic” feature.</strong> High- and low-LES cases
+              do not hinge on a single keyword. Instead, their scores emerge from
+              <strong>multi-feature patterns</strong> that blend structure, topics,
+              and framing over many segments.
+            </li>
+            <li>
+              <strong>Nuance within families.</strong> Even within one family,
+              totals and rates can push in different directions. For example,
+              <em>polite_total</em> may pull a case toward white-coded environments,
+              while <em>polite_rate</em> pushes another toward POC-coded, depending
+              on how politeness is distributed in the transcript.
+            </li>
+          </ul>
+          <p class="small-muted">
+            Together, these explanations support the project’s central claim: CourtShadow is
+            picking up <strong>institutional environments</strong> encoded in courtroom records,
+            not just anchoring on a single word or superficial cue.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- RESULTS / MODEL EVALUATION -->
+    <section id="results" class="section section-muted">
+      <div class="container">
+        <h2>Model Evaluation &amp; Key Results</h2>
+        <p class="section-lead">
+          On the held-out test set, CourtShadow shows <strong>strong discrimination</strong>
+          between POC-coded and white-coded cases, especially once we aggregate from
+          individual segments to the case level.
+        </p>
+
+        <div class="results-grid">
+          <!-- METRICS CARD -->
+          <div class="card results-metrics-card results-metrics-card--howto">
+            <h3>Overall performance</h3>
+
+            <div class="results-metrics">
+              <!-- Chunk-level accuracy -->
+              <div class="results-metric results-metric--glow results-metric--chunk-acc">
+                <div class="results-metric-label">Chunk-level accuracy</div>
+                <div class="results-metric-value">87.5%</div>
+                <div class="results-metric-caption">
+                  56 / 64 segments correctly classified on the test set.
+                </div>
+              </div>
+
+              <!-- Chunk-level AUC -->
+              <div class="results-metric results-metric--glow results-metric--chunk-auc">
+                <div class="results-metric-label">
+                  Chunk-level ROC AUC
+                </div>
+                <div class="results-metric-value">0.95</div>
+                <div class="results-metric-caption">
+                  Area under the Receiver Operating Characteristic (ROC) curve for segment scores.
+                </div>
+              </div>
+
+              <!-- Case-level accuracy (keep as “highlight” + glow) -->
+              <div class="results-metric results-metric--glow results-metric--case-acc results-metric--highlight">
+                <div class="results-metric-label">Case-level accuracy</div>
+                <div class="results-metric-value">100%</div>
+                <div class="results-metric-caption">
+                  8 / 8 held-out test cases correctly classified
+                  (<strong>4 POC-coded, 4 white-coded</strong>).
+                  This is encouraging but based on a small number of cases.
+                </div>
+              </div>
+
+              <!-- Case-level AUC -->
+              <div class="results-metric results-metric--glow results-metric--case-auc">
+                <div class="results-metric-label">Case-level ROC AUC</div>
+                <div class="results-metric-value">1.00</div>
+                <div class="results-metric-caption">
+                  Perfect separation between POC-coded and white-coded cases on the test set.
+                  Again, this should be interpreted with caution given only 8 cases.
+                </div>
+              </div>
+            </div>
+
+            <h3>Calibration snapshot</h3>
+            <p class="small-muted">
+              At the case level, predicted <strong>Linguistic Environment Scores (LES)</strong>
+              align well with observed frequencies in this small test set:
+              low predicted scores correspond to white-coded cases,
+              high scores to POC-coded cases, and mid-range scores mix both groups.
+              The calibration curve below visualizes how predicted LES compares
+              to empirical positive rates across bins.
+            </p>
+          </div>
+
+          <!-- EXPLANATION CARD -->
+          <div class="card results-metrics-card results-metrics-card--howto">
+            <h3>How to read these numbers</h3>
+            <p>
+              CourtShadow is trained on individual transcript <strong>segments</strong>, but
+              many of the most important inferences happen at the <strong>case level</strong>.
+            </p>
+
+            <ul class="nice-list">
+              <li>
+                <strong>Chunk-level accuracy (87.5%).</strong> Evaluates whether each segment
+                is classified as coming from a Group&nbsp;1-coded or Group&nbsp;0-coded case.
+                This tells us the model sees systematic differences across individual turns of
+                talk, but chunks are noisy and context-dependent.
+              </li>
+              <li>
+                <strong>Case-level accuracy (100%).</strong> Aggregates segment probabilities
+                for each case and asks whether the overall <em>environment</em> looks more like
+                a Group&nbsp;1-coded or Group&nbsp;0-coded case. This reflects the project’s focus:
+                <strong>environmental</strong> differences across entire trials.
+              </li>
+              <li>
+                <strong>ROC AUC.</strong> Measures how well the model ranks Group&nbsp;1-coded above
+                Group&nbsp;0-coded cases. A value near 1.0 means Group&nbsp;1-coded cases tend to receive
+                higher LES scores than Group&nbsp;0-coded cases, even before choosing a threshold.
+              </li>
+              <li>
+                <strong>Calibration.</strong> Asks whether predicted LES values match empirical
+                frequencies: among cases assigned an LES near 0.9, do we actually see roughly
+                90% Group&nbsp;1-coded cases? On this small test set, calibration is reasonably aligned.
+              </li>
+            </ul>
+
+            <p class="small-muted">
+              These results suggest that courtroom transcripts contain
+              <strong>non-trivial, systematic signals</strong> related to defendant group coding.
+              Because the test set is small, the numbers are best read as a
+              <em>proof of concept</em> rather than a final measurement.
+            </p>
+          </div>
+        </div>
+
+        <!-- VISUALS GRID -->
+        <div class="results-visuals-grid results-visuals-grid--wide">
+          <!-- CONFUSION MATRICES -->
+          <figure class="plot-card plot-card-dark plot-card--large reveal-on-scroll">
+            <div class="plot-card-header">
+              <h3>Chunk vs. case-level confusion</h3>
+              <p class="plot-card-subtitle">
+                Comparing segment-level and case-level predictions on the held-out test set.
+              </p>
+            </div>
+            <div class="plot-card-images">
+              <div class="plot-image-wrapper">
+                <img
+                  src="cm_chunk.png"
+                  alt="Chunk-level confusion matrix"
+                  class="results-plot-img"
+                />
+                <figcaption class="plot-caption">
+                  Chunk-level confusion matrix (64 test segments).
+                </figcaption>
+              </div>
+              <div class="plot-image-wrapper">
+                <img
+                  src="cm_case.png"
+                  alt="Case-level confusion matrix"
+                  class="results-plot-img"
+                />
+                <figcaption class="plot-caption">
+                  Case-level confusion matrix (8 test cases).
+                </figcaption>
+              </div>
+            </div>
+          </figure>
+
+          <!-- CALIBRATION CURVE -->
+          <figure class="plot-card plot-card-dark reveal-on-scroll">
+            <div class="plot-card-header">
+              <h3>Case-level calibration</h3>
+              <p class="plot-card-subtitle">
+                How predicted LES scores compare to observed Group&nbsp;1-coded frequencies across bins.
+              </p>
+            </div>
+            <div class="plot-image-wrapper">
+              <img
+                src="case_calibration_curve.png"
+                alt="Case-level calibration curve"
+                class="results-plot-img"
+              />
+            </div>
+            <figcaption class="plot-caption">
+              The diagonal line shows perfect calibration. CourtShadow’s case-level LES points
+              track this trend closely on the small test set.
+            </figcaption>
+          </figure>
+
+          <!-- LES DISTRIBUTION (UPDATED TO TEST CASES) -->
+          <figure class="plot-card plot-card-dark reveal-on-scroll">
+            <div class="plot-card-header">
+              <h3>LES distribution (test cases)</h3>
+              <p class="plot-card-subtitle">
+                Distribution of Linguistic Environment Scores across held-out test cases.
+              </p>
+            </div>
+            <div class="plot-image-wrapper">
+              <img
+                src="les_distribution.png"
+                alt="Histogram of LES scores across test cases"
+                class="results-plot-img"
+              />
+            </div>
+            <figcaption class="plot-caption">
+              Each bar aggregates test cases by their LES. Higher scores correspond to
+              environments that resemble Group&nbsp;1-coded cases in the training data.
+            </figcaption>
+          </figure>
+        </div>
+
+        <!-- MODEL EVALUATION CHECKS (TABBED / DE-CHUNKED) -->
+        <div class="card results-eval-card reveal-on-scroll" style="margin-top: 2.25rem;">
+          <div class="results-eval-header">
+            <h3>Model Evaluation: Baselines &amp; L2 Regularization</h3>
+            <p class="small-muted">
+              To interpret CourtShadow’s performance responsibly, I compare it to simple baselines
+              and check that improvements are not just artifacts of class imbalance or overfitting.
+            </p>
+          </div>
+
+          <!-- Tabs for baselines vs. L2 -->
+          <div class="results-eval-tabs">
+            <button class="results-eval-tab active" data-eval-tab="baselines">
+              Baseline checks
+            </button>
+            <button class="results-eval-tab" data-eval-tab="l2">
+              L2 regularization
+            </button>
+          </div>
+
+          <div class="results-eval-panels">
+            <!-- ===================== BASELINES PANEL (FLIPBOOK) ===================== -->
+            <div class="results-eval-panel active" data-eval-panel="baselines">
+              <div class="results-eval-section">
+                <h4>Baseline comparisons</h4>
+
+                <!-- Stepper / flipbook controls -->
+                <div class="results-stepper">
+                  <div class="results-step-nav">
+                    <button class="results-step-dot active" data-step-target="1">1</button>
+                    <button class="results-step-dot" data-step-target="2">2</button>
+                    <button class="results-step-dot" data-step-target="3">3</button>
+                  </div>
+
+                  <div class="results-step-cards">
+                    <!-- Step 1 -->
+                    <article class="results-step-card active" data-step="1">
+                      <h5 class="results-step-title">Majority-class baseline (chunks)</h5>
+                      <p>
+                        A trivial classifier that always predicts the more common group in the training
+                        data achieves an accuracy of roughly <strong>67.4%</strong>.
+                      </p>
+                      <p class="small-muted">
+                        In the training data, <strong>1,261 of 1,870</strong> segments belong to the
+                        majority Group&nbsp;1-coded class. Always predicting Group&nbsp;1-coded therefore
+                        gets 1,261 / 1,870 ≈ 0.674 of segments “correct” by construction.
+                      </p>
+                      <p>
+                        CourtShadow’s chunk-level accuracy of <strong>87.5%</strong> is therefore
+                        substantially above what we would expect from simply memorizing the majority group.
+                      </p>
+                    </article>
+
+                    <!-- Step 2 -->
+                    <article class="results-step-card" data-step="2">
+                      <h5 class="results-step-title">Random-chance intuition</h5>
+                      <p>
+                        With two groups, a perfectly uninformed classifier would hover near
+                        <strong>50%</strong> accuracy if classes were balanced.
+                      </p>
+                      <p class="small-muted">
+                        In this dataset, Group&nbsp;1-coded segments are more common, which pushes the
+                        majority-class baseline above 50%. This makes it especially important to compare
+                        against the <strong>67.4%</strong> majority baseline, not a naive 50% guess.
+                      </p>
+                      <p>
+                        CourtShadow’s performance should be read relative to this stronger baseline,
+                        which it clearly exceeds at the chunk level.
+                      </p>
+                    </article>
+
+                    <!-- Step 3 -->
+                    <article class="results-step-card" data-step="3">
+                      <h5 class="results-step-title">Case-level performance vs. baselines</h5>
+                      <p>
+                        At the case level, always predicting the majority label would still misclassify a
+                        non-trivial share of cases.
+                      </p>
+                      <p>
+                        By contrast, CourtShadow correctly classifies
+                        <strong>8 / 8 held-out test cases</strong>, using case-level
+                        <strong>Linguistic Environment Scores</strong> that aggregate segment predictions.
+                      </p>
+                      <p class="small-muted">
+                        This suggests that the case-level LES captures meaningful structure beyond simple
+                        label imbalance: CourtShadow is not just echoing the marginal distribution of labels,
+                        but leveraging systematic differences in how cases are structured and described.
+                      </p>
+                    </article>
+                  </div>
+
+                  <div class="results-step-arrows">
+                    <button class="results-step-btn results-step-prev" type="button">
+                      ‹ Previous
+                    </button>
+                    <button class="results-step-btn results-step-next" type="button">
+                      Next ›
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ===================== L2 PANEL (ACCORDION) ===================== -->
+            <div class="results-eval-panel" data-eval-panel="l2">
+              <div class="results-eval-section results-eval-section--l2">
+                <h4>L2 regularization: stabilizing a small-N model</h4>
+                <p class="small-muted">
+                  Simply turning up the learning rate or number of gradient steps on an unregularized
+                  logistic regression did <em>not</em> improve performance on this dataset; if anything,
+                  it tended to overfit noisy segment-level patterns. Adding an
+                  <strong>L2 penalty</strong> gives the model a way to control complexity directly.
+                </p>
+
+                <div class="results-accordion">
+                  <!-- Item 1 -->
+                  <div class="results-accordion-item">
+                    <button class="results-accordion-header" type="button">
+                      <span>Why regularization?</span>
+                      <span class="results-accordion-icon">+</span>
+                    </button>
+                    <div class="results-accordion-body">
+                      <p>
+                        CourtShadow uses 38 interpretable features per segment but only a modest number
+                        of training cases. Without regularization, gradient descent can push some weights
+                        to extreme values that fit idiosyncratic chunks rather than general patterns.
+                      </p>
+                      <p>
+                        This is exactly the regime where L2 regularization is useful: it nudges the model
+                        toward <strong>smaller, more stable coefficients</strong> instead of trying to
+                        memorize every training fluctuation.
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Item 2 -->
+                  <div class="results-accordion-item">
+                    <button class="results-accordion-header" type="button">
+                      <span>The math</span>
+                      <span class="results-accordion-icon">+</span>
+                    </button>
+                    <div class="results-accordion-body">
+                      <p>
+                        Instead of minimizing only the negative log-likelihood \(J(\theta)\), the
+                        L2-regularized objective adds a penalty on the squared weights (excluding the
+                        bias term):
+                      </p>
+                      <p>
+                        \[
+                          J_{\text{L2}}(\theta)
+                          = J(\theta) + \lambda \sum_{j=1}^{d} \theta_j^2,
+                        \]
+                      </p>
+                      <p>
+                        where \(j = 1, \dots, d\) indexes the non-bias features. The gradient becomes:
+                      </p>
+                      <p>
+                        \[
+                          \nabla_{\theta_j} J_{\text{L2}}(\theta)
+                          = \sum_{i=1}^n (p_i - y_i)x_{ij} + 2\lambda \theta_j
+                          \quad \text{for } j \ge 1,
+                        \]
+                      </p>
+                      <p>
+                        and the bias coordinate (\(j = 0\)) is left unpenalized. This term gently pulls
+                        large coefficients back toward zero, discouraging the model from relying too
+                        heavily on any single feature.
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Item 3 -->
+                  <div class="results-accordion-item">
+                    <button class="results-accordion-header" type="button">
+                      <span>Choosing \(\lambda\)</span>
+                      <span class="results-accordion-icon">+</span>
+                    </button>
+                    <div class="results-accordion-body">
+                      <p>
+                        I sweep over a range of regularization strengths and plot performance as a
+                        function of \(\lambda\).
+                      </p>
+                      <p>
+                        Very small penalties (\(\lambda \approx 0\)) behave like the unregularized model
+                        and can overfit; very large penalties underfit by flattening all weights.
+                      </p>
+                      <p>
+                        A <strong>moderate value</strong>, around \(\lambda = 10^{-3}\), yields the best
+                        trade-off on held-out data: improved chunk-level accuracy and case-level calibration,
+                        with weights that remain interpretable and stable across splits.
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Item 4 -->
+                  <div class="results-accordion-item">
+                    <button class="results-accordion-header" type="button">
+                      <span>Result</span>
+                      <span class="results-accordion-icon">+</span>
+                    </button>
+                    <div class="results-accordion-body">
+                      <p>
+                        With L2 regularization turned on, CourtShadow’s logistic regression becomes
+                        <strong>more robust</strong> than the unregularized model that merely tweaks
+                        learning rate and iteration count.
+                      </p>
+                      <p>
+                        The regularized model better matches held-out performance, while preserving
+                        the clean feature-family structure used for Linguistic Environment Score
+                        explanations.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p class="small-muted results-eval-summary">
+                Together, these checks suggest that CourtShadow’s performance is not just a byproduct
+                of class imbalance or overfitting: the model meaningfully outperforms simple baselines,
+                and L2 regularization helps keep its logistic regression weights in a regime where
+                case-level explanations remain stable and interpretable on a small test set.
+              </p>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- L2 REGULARIZATION VISUAL (IMAGE IN SAME FOLDER) -->
+        <figure class="plot-card plot-card-dark reveal-on-scroll" style="margin-top: 2rem;">
+          <div class="plot-card-header">
+            <h3>Effect of L2 regularization</h3>
+            <p class="plot-card-subtitle">
+              Model performance as a function of L2 strength \(\lambda\), sweeping from
+              almost-unregularized to heavily-regularized regimes.
+            </p>
+          </div>
+
+          <!-- DARK-THEME WRAPPER AROUND THE PLOT -->
+          <div class="plot-image-wrapper l2-plot-wrapper">
+            <img
+              src="l2_regularization_curve.png"
+              alt="Plot showing model performance as a function of L2 regularization strength"
+              class="results-plot-img results-plot-img--l2"
+            />
+          </div>
+
+          <figcaption class="plot-caption">
+            In this project, I vary \(\lambda\) across several orders of magnitude and track
+            held-out performance. Very small penalties overfit noisy segment-level patterns,
+            while very large penalties underfit. The curve peaks around a moderate
+            \(\lambda\) (on the order of \(10^{-3}\)), which is the value used for the final
+            CourtShadow model.
+          </figcaption>
+        </figure>
+     </section>
+
+      <!-- ETHICS (now first) -->
+      <section id="ethics" class="section section-muted reveal-on-scroll ethics-section">
+        <div class="container">
+          <div class="ethics-header">
+            <h2>Ethics &amp; Limitations</h2>
+            <p class="section-lead">
+              CourtShadow is a <strong>proof-of-concept</strong>, not a diagnostic tool. This section
+              outlines where the model is limited, how it should (and should not) be used, and why
+              different kinds of errors matter differently in the context of the justice system.
+            </p>
+          </div>
+
+          <div class="ethics-grid">
+            <!-- LEFT: LIMITATIONS (FLIPBOOK WITH PILL TABS) -->
+            <article class="card ethics-card ethics-card--limits">
+              <div class="ethics-card-header">
+                <span class="ethics-tag">Model limitations</span>
+                <h3>How to read CourtShadow responsibly</h3>
+              </div>
+
+              <!-- Pill tabs -->
+              <div class="ethics-stepper">
+                <div class="ethics-step-dots">
+                  <button class="ethics-step-dot active" data-ethics-step-target="1">
+                    Small-N sample
+                  </button>
+                  <button class="ethics-step-dot" data-ethics-step-target="2">
+                    What the model sees
+                  </button>
+                  <button class="ethics-step-dot" data-ethics-step-target="3">
+                    Intended use
+                  </button>
+                </div>
+
+                <div class="ethics-step-cards">
+                  <!-- STEP 1 -->
+                  <article class="ethics-step-card active" data-ethics-step="1">
+                    <h4 class="ethics-step-title">Small-N, skewed sample</h4>
+                    <p>
+                      CourtShadow is trained on <strong>42 criminal trial transcripts</strong> and
+                      <strong>1,900+ segments</strong>, collected from publicly available cases.
+                      This is a small, convenience sample: it is <strong>not representative</strong>
+                      of all jurisdictions, case types, or defendant experiences.
+                    </p>
+                    <p class="small-muted">
+                      Any patterns the model finds should be read as
+                      <strong>hypothesis-generating</strong>, not as population-wide estimates.
+                      Scaling this work would require much larger, systematically sampled corpora.
+                    </p>
+                  </article>
+
+                  <!-- STEP 2 -->
+                  <article class="ethics-step-card" data-ethics-step="2">
+                    <h4 class="ethics-step-title">What the model can and cannot see</h4>
+                    <p>
+                      CourtShadow only “sees” what is preserved in the transcript:
+                      <strong>who speaks, how long, how they frame events, and what topics appear</strong>.
+                      It does <strong>not</strong> observe:
+                    </p>
+                    <ul class="nice-list compact">
+                      <li>plea negotiations or cases that never go to trial;</li>
+                      <li>charging decisions, policing practices, or jury selection;</li>
+                      <li>non-verbal signals, tone, or local courtroom culture.</li>
+                    </ul>
+                    <p class="small-muted">
+                      As a result, CourtShadow approximates an
+                      <strong>institutional linguistic environment</strong>, not the full process
+                      that produces case outcomes.
+                    </p>
+                  </article>
+
+                  <!-- STEP 3 -->
+                  <article class="ethics-step-card" data-ethics-step="3">
+                    <h4 class="ethics-step-title">Not a diagnostic or decision tool</h4>
+                    <p>
+                      This model is designed strictly for <strong>research and illustration</strong>.
+                      It should <strong>never</strong> be used to make or recommend decisions about
+                      individual defendants, judges, prosecutors, or cases.
+                    </p>
+                    <p>
+                      Instead, the intended use is to:
+                    </p>
+                    <ul class="nice-list compact">
+                      <li>highlight <strong>aggregate patterns</strong> in courtroom language;</li>
+                      <li>suggest places where <strong>qualitative and legal analysis</strong> might look next;</li>
+                      <li>support conversations about how institutional records encode disparities.</li>
+                    </ul>
+                    <p class="small-muted">
+                      In short, CourtShadow provides <strong>structured questions</strong>, not answers.
+                    </p>
+                  </article>
+                </div>
+              </div>
+              </article> <!-- end first ethics card (limitations card) -->
+
+      <!-- ERRORS & THRESHOLDS CARD -->
+      <article class="ethics-card ethics-card--errors">
+        <div class="ethics-card-header">
+          <span class="ethics-tag ethics-tag--accent">Error tradeoffs</span>
+          <h3>When CourtShadow is wrong, who pays the price?</h3>
+        </div>
+
+        <p>
+          CourtShadow never predicts an individual’s race. Instead, it classifies
+          linguistic environments into two groups (A/B-coded) and we study how
+          often those environments line up with real-world disparities.
+          Even so, <strong>different kinds of mistakes hurt different people.</strong>
+        </p>
+
+        <!-- Slider block -->
+        <div class="ethics-slider-block">
+          <label class="ethics-slider-label" for="ethics-error-slider">
+            Adjust the model’s operating threshold:
+          </label>
+
+          <input
+            id="ethics-error-slider"
+            class="ethics-slider-range"
+            type="range"
+            min="0"
+            max="100"
+            value="50"
+          />
+
+          <div class="ethics-slider-labels">
+            <span>More tolerant of possible bias (more false positives)</span>
+            <span>More cautious about flagging bias (more false negatives)</span>
+          </div>
+
+        </div>
+
+        <!-- Accordion -->
+        <div class="ethics-accordion">
+
+      <!-- FALSE POSITIVES -->
+      <button
+        class="ethics-accordion-trigger"
+        data-target="fp"
+        type="button"
+      >
+        <div class="ethics-accordion-trigger-main">
+          <span class="ethics-accordion-label">
+            False positives • Group B-coded transcript flagged as Group A-coded environment
+          </span>
+          <span class="ethics-accordion-tag">More flags, more over-calling</span>
+        </div>
+        <span class="ethics-accordion-chevron">▸</span>
+      </button>
+
+      <div
+        class="ethics-accordion-panel ethics-accordion-panel--fp"
+        id="ethics-panel-fp"
+      >
+        <p>
+          A <strong>false positive</strong> happens when the model flags a
+          transcript as living in a “Group A-coded” linguistic environment
+          when the overall pattern of language is actually closer to Group B.
+        </p>
+        <ul>
+          <li>Researchers may overestimate how often Group A-coded language appears.</li>
+          <li>Courts or watchdogs might chase “ghost” disparities that are not really there.</li>
+          <li>Communities associated with Group B could feel wrongly labeled or pathologized.</li>
+        </ul>
+        <p class="ethics-math tiny">
+          In confusion matrix terms: \( \hat{y} = 1 \) (Group A-coded) but \( y = 0 \) (Group B-coded).
+        </p>
+      </div>
+
+      <!-- FALSE NEGATIVES -->
+      <button
+        class="ethics-accordion-trigger"
+        data-target="fn"
+        type="button"
+      >
+        <div class="ethics-accordion-trigger-main">
+          <span class="ethics-accordion-label">
+            False negatives • Group A-coded transcript missed as Group B-coded environment
+          </span>
+          <span class="ethics-accordion-tag">More misses, fewer flags</span>
+        </div>
+        <span class="ethics-accordion-chevron">▸</span>
+      </button>
+
+      <div
+        class="ethics-accordion-panel ethics-accordion-panel--fn"
+        id="ethics-panel-fn"
+      >
+        <p>
+          A <strong>false negative</strong> happens when the model fails to flag
+          a transcript whose language looks like other Group A-coded environments.
+        </p>
+        <ul>
+          <li>Real disparities in how people are treated may never be investigated.</li>
+          <li>Communities harmed by the pattern see “data-driven” proof that nothing is wrong.</li>
+          <li>Institutional bias can remain invisible under a veneer of objectivity.</li>
+        </ul>
+        <p class="ethics-math tiny">
+          Here, \( y = 1 \) (Group A-coded) but \( \hat{y} = 0 \) (Group B-coded).
+        </p>
+      </div>
+
+</div>
+
+
+        <p class="ethics-errors-note">
+          CourtShadow is not deployed in any real courtroom. All thresholds,
+          error tradeoffs, and groups are used in a retrospective, research-only
+          setting to study <em>structural</em> patterns in language, not to make
+          decisions about individuals.
+        </p>
+      </article> <!-- end errors card -->
+
+    </div> <!-- end .ethics-grid -->
+  </div> <!-- end .container -->
+</section> <!-- end #ethics -->
+
+      <!-- KEY FINDINGS / MAIN TAKEAWAYS (now after ethics) -->
+      <section id="findings" class="section reveal-on-scroll">
+        <div class="container">
+          <h2>Main takeaways</h2>
+          <p class="section-lead">
+            CourtShadow is a <strong>proof-of-concept</strong> that courtroom transcripts alone
+            contain enough structured signal for a simple, interpretable model to distinguish
+            environments associated with different defendant groups. The goal is not to prove
+            causality, but to show that <strong>language and procedure leave a measurable imprint</strong>
+            related to defendant race.
+          </p>
+
+          <div class="two-column takeaways-grid">
+            <!-- LEFT: IMPACT + SUBSTANTIVE FINDINGS -->
+            <div>
+              <div class="card highlight-card">
+                <h3>1. Court records encode institutional patterns</h3>
+                <p>
+                  At the <strong>case level</strong>, CourtShadow correctly classifies all held-out
+                  test cases, with <strong>100% accuracy</strong> and <strong>AUC ≈ 1.0</strong>.
+                  This goes far beyond a majority-class or random baseline and shows that
+                  <strong>who speaks, what they talk about, and how they talk</strong> differ
+                  systematically across the groups in this project.
+                </p>
+                <p class="small-muted">
+                  In other words: if we only see the transcript and a 38-dimensional feature vector
+                  per segment—no race variable at all—the model can still reliably tell which
+                  environments belong to which defendant group.
+                </p>
+              </div>
+
+              <div class="card highlight-card">
+                <h3>2. Structure &amp; procedure matter as much as wording</h3>
+                <p>
+                  Decomposing the logistic regression weights shows that case-level
+                  <strong>Linguistic Environment Scores</strong> are driven by
+                  <em>families</em> of features:
+                </p>
+                <ul class="nice-list compact">
+                  <li><strong>Structure:</strong> length, sentences, and questions per segment.</li>
+                  <li><strong>Framing:</strong> politeness, harshness, mitigation, (un)certainty.</li>
+                  <li><strong>Topics:</strong> weapons, drugs, fraud, police interaction, injury.</li>
+                  <li><strong>Pronouns &amp; address:</strong> “I / we / you” rates by role.</li>
+                </ul>
+                <p class="small-muted">
+                  The signal comes from <strong>patterns across many turns</strong>, not from a
+                  single loaded word. This supports the project’s focus on
+                  <strong>institutional environments</strong> rather than individual prejudice.
+                </p>
+              </div>
+
+              <div class="card highlight-card">
+                <h3>3. Case-level “shadows” highlight where to look next</h3>
+                <p>
+                  Some cases with defendants of color receive very high CourtShadow scores, while
+                  many white-defendant cases cluster lower. Rather than treating the score as a
+                  verdict, the project uses it as a <strong>triage tool</strong>:
+                </p>
+                <ul class="nice-list compact">
+                  <li>
+                    High-score cases flag environments whose <strong>structure, topics, and framing</strong>
+                    most resemble POC-coded trials in the training data.
+                  </li>
+                  <li>
+                    Low-score cases provide contrast, showing which institutional patterns are
+                    more common in white-coded environments.
+                  </li>
+                </ul>
+                <p class="small-muted">
+                  These shadows are an invitation for <strong>deeper qualitative and legal work</strong>,
+                  not a substitute for it.
+                </p>
+              </div>
+            </div>
+
+            <!-- RIGHT: CS109 CONCEPTS + CREATIVITY + NEXT STEPS -->
+            <div>
+              <div class="card highlight-card cs109-math-small">
+                <h3>CS109 concepts in action</h3>
+                <p>
+                  CourtShadow intentionally leans on the <strong>core toolkit of CS109</strong> rather
+                  than a black-box model, to keep every step mathematically transparent:
+                </p>
+                <ul class="nice-list compact">
+                  <li>
+                    <strong>Data pipeline:</strong> manual collection of 42 criminal transcripts,
+                    cleaning, chunking into 1,900+ segments, and merging in speaker-role metadata.
+                  </li>
+                  <li>
+                    <strong>Feature engineering:</strong> 38 interpretable features per segment
+                    spanning structure, framing, topics, and pronouns.
+                  </li>
+                  <li>
+                    <strong>Probabilistic modeling:</strong> Bernoulli likelihood
+                    \(P(y=1 \mid x)\) with a logistic link, trained by gradient descent.
+                  </li>
+                  <li>
+                    <strong>Model evaluation:</strong> held-out test split, majority-class and
+                    random baselines, <strong>accuracy</strong>, <strong>ROC AUC</strong>, and
+                    <strong>calibration curves</strong>.
+                  </li>
+                  <li>
+                    <strong>Regularization:</strong> L2-penalized objective
+                    \(J_{\text{L2}}(\theta) = J(\theta) + \lambda \sum_j \theta_j^2\),
+                    tuned over a grid of \(\lambda\) values to balance bias–variance.
+                  </li>
+                  <li>
+                    <strong>Interpretability:</strong> decomposing \(\theta^\top x\) into
+                    family-level contributions to build <strong>case-level explanations</strong>,
+                    not just a single score.
+                  </li>
+                </ul>
+                <p class="small-muted">
+                  The result is a model that is <strong>statistically grounded</strong>,
+                  <strong>regularized</strong>, and <strong>explainable end-to-end</strong>, in the
+                  spirit of CS109.
+                </p>
+              </div>
+
+              <div class="card highlight-card">
+                <h3>An Intentional Design: beyond a single number</h3>
+                <p>
+                  A major design choice in CourtShadow is to treat interpretability as a feature,
+                  not an afterthought:
+                </p>
+                <ul class="nice-list compact">
+                  <li>
+                    Building <strong>Linguistic Environment Scores</strong> by aggregating
+                    segment-level probabilities into case-level views.
+                  </li>
+                  <li>
+                    Presenting <strong>side-by-side case studies</strong> (e.g., The Wilmington Ten
+                    vs. United States v. Cohen) to show how feature families behave in concrete trials.
+                  </li>
+                  <li>
+                    Using custom visualizations—confusion matrices, calibration curves, and
+                    contribution bars—to make abstract metrics legible to non-technical audiences.
+                  </li>
+                </ul>
+                <p class="small-muted">
+                  Together, the modeling decisions and visuals turn a logistic regression into a
+                  <strong>narrative tool</strong> for thinking about institutional bias.
+                </p>
+              </div>
+
+              <div class="card highlight-card">
+                <h3>Where this project could go next</h3>
+                <p>
+                  CourtShadow is deliberately small-N and interpretable. With more time and data,
+                  natural extensions would include:
+                </p>
+                <ul class="nice-list compact">
+                  <li>
+                    Scaling to <strong>larger, more diverse transcript corpora</strong> and
+                    jurisdictions.
+                  </li>
+                  <li>
+                    Comparing interpretable models to <strong>richer text encoders</strong>
+                    (e.g., embeddings) while keeping case-level explanations central.
+                  </li>
+                  <li>
+                    Integrating <strong>formal fairness diagnostics</strong> and domain-expert
+                    annotation to evaluate how different modeling choices impact conclusions.
+                  </li>
+                </ul>
+                <p class="small-muted">
+                  The current version is a first pass that shows <em>it is possible</em> to model
+                  courtroom “shadows” with transparent tools—and that doing so raises questions
+                  worth exploring far beyond a single CS109 project.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- REAL-WORLD APPLICATIONS (now last before About) -->
+      <section
+        id="applications"
+        class="section section-muted reveal-on-scroll applications-section"
+      >
+        <!-- Animated background for this section only -->
+        <div class="applications-bg">
+          <div class="applications-bg-ring"></div>
+          <div class="applications-bg-gradient"></div>
+        </div>
+
+        <div class="container applications-inner">
+          <!-- Header + intro -->
+          <div class="applications-header">
+            <h2 class="applications-title">Real-world Applications</h2>
+            <p class="section-lead">
+              While CourtShadow is a <strong>research demonstration</strong> rather than any kind of
+              diagnostic or legal decision tool, its approach intersects meaningfully with ongoing
+              policy conversations—especially those shaped by California’s
+              <strong>Racial Justice Act (RJA)</strong>.
+            </p>
+            <p class="applications-sublead small-muted">
+              Think of this section as a <strong>policy orbit</strong>: how a small, interpretable CS109 model
+              touches large debates about racial justice, evidence, and courtroom language.
+            </p>
+          </div>
+
+          <!-- CARDS GRID: 3 CARDS ON ONE LINE -->
+          <div class="applications-cards-grid">
+            <!-- CARD 1: RJA SPOTLIGHT -->
+            <article class="card applications-card applications-card--rja floating-card">
+              <div class="applications-card-glow"></div>
+              <div class="applications-card-header">
+                <span class="applications-tag">Policy spotlight</span>
+                <h3>The Racial Justice Act: a shift in how bias is proven</h3>
+              </div>
+              <p>
+                Enacted in 2020 and expanded in 2022, California’s
+                <strong>Racial Justice Act (RJA)</strong> transformed how defendants may demonstrate
+                racial bias in criminal proceedings. Historically, challenges invoking racial disparities
+                ran into the high evidentiary bar established by
+                <em>McCleskey v. Kemp</em> (1987), where the U.S. Supreme Court ruled that
+                <strong>statistical evidence of systemic disparities was insufficient</strong>
+                without proof of intentional discrimination in an individual case.
+              </p>
+              <p>
+                The RJA changes that standard. Under the Act, defendants may now seek relief—including
+                reduced sentences—when they can show that racial bias (explicit or implicit)
+                <strong>“was a factor”</strong> in charging, convictions, sentencing, or courtroom conduct—
+                without needing to prove purposeful discrimination by a specific actor.
+              </p>
+              <p class="small-muted applications-reference">
+                For a detailed overview, see
+                <a
+                  href="https://law.stanford.edu/2023/09/05/californias-racial-justice-act-expanding-the-path-to-justice/"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Stanford Law’s analysis of the RJA ↗
+                </a>.
+              </p>
+            </article>
+
+            <!-- CARD 2: HOW COURTSHADOW COULD HELP -->
+            <article class="card applications-card applications-card--support floating-card">
+              <div class="applications-card-glow"></div>
+              <div class="applications-card-header">
+                <span class="applications-tag applications-tag--accent">Research trajectory</span>
+                <h3>How CourtShadow could support future RJA-related research</h3>
+              </div>
+              <p>
+                Because the RJA explicitly allows defendants to use <strong>patterns in courtroom language,
+                procedure, and treatment</strong> as evidence, projects like CourtShadow gesture toward a
+                potential research direction: studying whether the <em>institutional environment</em> of
+                courtroom transcripts differs systematically across groups. CourtShadow does <strong>not</strong>
+                measure bias or make case-level legal claims, but it illustrates how linguistic and structural
+                features of the record can be <strong>quantified, aggregated, and compared</strong>.
+              </p>
+              <p>In principle, models of this type could someday help:</p>
+              <ul class="nice-list compact applications-list">
+                <li>
+                  identify <strong>systematic patterns</strong> in courtroom speech that merit deeper
+                  qualitative or legal review;
+                </li>
+                <li>
+                  assist researchers examining how <strong>procedural treatment</strong> varies across
+                  groups over many transcripts;
+                </li>
+                <li>
+                  support policy discussions on how institutional language reflects broader disparities.
+                </li>
+              </ul>
+              <p class="small-muted">
+                Any such application would require far larger datasets, domain-expert review, and
+                safeguards against misuse. CourtShadow’s role is <strong>illustrative</strong>, not
+                diagnostic.
+              </p>
+
+              <div class="applications-mini-footer">
+                <span class="applications-mini-pill">Interpretability-first</span>
+                <span class="applications-mini-pill">Small-N proof of concept</span>
+                <span class="applications-mini-pill">Not a legal tool</span>
+              </div>
+            </article>
+
+            <!-- CARD 3: HISTORICAL ARC -->
+            <article class="card applications-card applications-card--history floating-card">
+              <div class="applications-card-glow"></div>
+              <div class="applications-card-header">
+                <span class="applications-tag">Historical arc</span>
+                <h3>A historical note: McCleskey &amp; CourtShadow</h3>
+              </div>
+              <p>
+                The RJA was crafted in direct response to the jurisprudential barrier erected by
+                <em>McCleskey v. Kemp</em>, which held that even striking statewide racial disparities
+                in death-sentencing data did not meet the burden of showing intentional discrimination
+                in an individual case. One interesting connection:
+                <strong>the McCleskey case itself is included in CourtShadow’s training set</strong>.
+              </p>
+              <p>
+                Although the model does not know the defendant’s race and uses no explicit racial variables,
+                it is trained on segments that come from historically significant proceedings—including one
+                at the center of the RJA’s legislative origins.
+              </p>
+              <p class="small-muted">
+                This underscores a broader point: the <strong>language of the courtroom</strong>, captured
+                in transcripts, is part of the historical record that shapes present-day reforms. A model
+                like CourtShadow helps highlight that this language is <strong>quantifiable</strong>,
+                interpretable, and connected to longstanding debates about structural equity.
+              </p>
+            </article>
+          </div>
+
+          <!-- Thin animated ribbon tying back to the “wave” -->
+          <div class="applications-ribbon">
+            <div class="applications-ribbon-gradient"></div>
+            <p class="applications-ribbon-text small-muted">
+              CourtShadow stays firmly in the realm of <strong>research</strong>—but the shadows it maps
+              align with live legal and policy questions about how courts speak, record, and remember.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABOUT (cutesy card with avatar) -->
+            <!-- ABOUT (cutesy card with avatar) -->
+      <section id="about" class="about-section section reveal-on-scroll">
+        <div class="container">
+          <div class="about-card card">
+
+            <div class="about-left">
+              <span class="about-pill">Creator</span>
+
+              <h3 class="about-title">Diya Karan</h3>
+              <p class="about-email">nadiya@stanford.edu</p>
+
+              <p class="about-text">
+                I’m an undergraduate student at Stanford studying the subtle and institutional
+                structures that shape courtroom language. CourtShadow is part of my broader work on
+                transparency, interpretability, and the responsible use of computational methods in
+                legal contexts.
+              </p>
+            </div>
+
+            <div class="about-right">
+              <div class="about-avatar">
+                <img src="profile_pic.jpg" alt="Your profile photo" />
+              </div>
+
+              <div class="about-meta">
+                <p class="about-mini-note">
+                    Sophomore •<br>CS + Political Science • Stanford University
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>© 2025 CourtShadow · CS109 Final Project</span>
+      <span class="footer-right">Built with HTML, CSS, and a little JS</span>
+    </div>
+  </footer>
+
+  <!-- SCROLL REVEAL + FLIP SCRIPT -->
+  <script>
+    const revealEls = document.querySelectorAll(".reveal-on-scroll");
+    const flipEls = document.querySelectorAll(".reveal-flip");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            if (entry.target.classList.contains("reveal-on-scroll")) {
+              entry.target.classList.add("in-view");
+            }
+            if (entry.target.classList.contains("reveal-flip")) {
+              entry.target.classList.add("in-view");
+            }
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    revealEls.forEach((el) => observer.observe(el));
+    flipEls.forEach((el) => observer.observe(el));
+  </script>
+
+  <!-- SCROLL WAVE -->
+  <script>
+    (function () {
+      function updateMaxScroll() {
+        return document.documentElement.scrollHeight - window.innerHeight;
+      }
+
+      let maxScroll = updateMaxScroll();
+
+      function updateWave() {
+        maxScroll = Math.max(updateMaxScroll(), 1);
+        const progress = window.scrollY / maxScroll; // 0 → bottom, 1
+        const clamped = Math.min(Math.max(progress, 0), 1);
+        document.body.style.setProperty("--wave-progress", clamped.toFixed(4));
+      }
+
+      window.addEventListener("scroll", updateWave, { passive: true });
+      window.addEventListener("resize", () => {
+        maxScroll = updateMaxScroll();
+        updateWave();
+      });
+
+      // initial position
+      updateWave();
+    })();
+  </script>
+
+  <!-- INTERPRETABILITY BARS ANIMATION -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const cards = document.querySelectorAll(".interpret-card");
+
+      if (!cards.length) return;
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+
+            const bars = entry.target.querySelectorAll(".interpret-feature-bar");
+            bars.forEach((bar) => {
+              const inner = bar.querySelector(".interpret-feature-bar-inner");
+              if (!inner) return;
+              const value = parseFloat(bar.dataset.value || "0");
+              const clamped = Math.min(Math.max(value, 0), 1);
+              inner.style.width = clamped * 100 + "%";
+            });
+
+            io.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.4 }
+      );
+
+      cards.forEach((card) => io.observe(card));
+    });
+  </script>
+
+  <!-- FEATURE TABS + BAR ANIMATION -->
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          const tabs = document.querySelectorAll(".feature-tab");
+          const slides = document.querySelectorAll(".feature-slide");
+
+          function showSlide(key) {
+            slides.forEach((slide) => {
+              const isActive = slide.dataset.featureSlide === key;
+              slide.classList.toggle("active", isActive);
+
+              // Animate bars only on the overview slide
+              if (isActive && key === "overview") {
+                const bars = slide.querySelectorAll(".feature-bar");
+                if (!bars.length) return;
+
+                const counts = Array.from(bars).map((bar) =>
+                  parseInt(bar.dataset.count || "0", 10)
+                );
+                const max = Math.max(...counts, 1);
+
+                bars.forEach((bar, idx) => {
+                  const count = counts[idx];
+                  const pct = (count / max) * 100;
+                  const inner = bar.querySelector(".feature-bar-inner");
+                  if (!inner) return;
+
+                  // reset so re-clicking animates again
+                  inner.classList.remove("filled");
+                  inner.style.height = "0%";
+
+                  requestAnimationFrame(() => {
+                    inner.style.height = pct + "%";
+                    inner.classList.add("filled");
+                  });
+                });
+              }
+            });
+
+            tabs.forEach((tab) => {
+              tab.classList.toggle("active", tab.dataset.featureTab === key);
+            });
+          }
+
+          tabs.forEach((tab) => {
+            tab.addEventListener("click", () => {
+              const key = tab.dataset.featureTab;
+              showSlide(key);
+            });
+          });
+
+          // Initialize on overview
+          showSlide("overview");
+        });
+      </script>
+
+      <!-- RESULTS EVAL TABS SCRIPT -->
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          const evalTabs = document.querySelectorAll(".results-eval-tab");
+          const evalPanels = document.querySelectorAll(".results-eval-panel");
+
+          if (!evalTabs.length) return;
+
+          evalTabs.forEach((tab) => {
+            tab.addEventListener("click", () => {
+              const key = tab.dataset.evalTab;
+
+              evalTabs.forEach((t) => {
+                t.classList.toggle("active", t.dataset.evalTab === key);
+              });
+
+              evalPanels.forEach((panel) => {
+                panel.classList.toggle(
+                  "active",
+                  panel.dataset.evalPanel === key
+                );
+              });
+            });
+          });
+        });
+      </script>
+
+        <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // ===== Flipbook / stepper for baseline checks =====
+        const stepCards = document.querySelectorAll(".results-step-card");
+        const stepDots = document.querySelectorAll(".results-step-dot");
+        const prevBtn = document.querySelector(".results-step-prev");
+        const nextBtn = document.querySelector(".results-step-next");
+
+        function setStep(step) {
+          stepCards.forEach((card) => {
+            card.classList.toggle("active", card.dataset.step === String(step));
+          });
+          stepDots.forEach((dot) => {
+            dot.classList.toggle("active", dot.dataset.stepTarget === String(step));
+          });
+        }
+
+        if (stepCards.length && stepDots.length && prevBtn && nextBtn) {
+          let currentStep = 1;
+          const maxStep = stepCards.length;
+
+          stepDots.forEach((dot) => {
+            dot.addEventListener("click", () => {
+              const target = parseInt(dot.dataset.stepTarget || "1", 10);
+              currentStep = target;
+              setStep(currentStep);
+            });
+          });
+
+          prevBtn.addEventListener("click", () => {
+            currentStep = currentStep > 1 ? currentStep - 1 : maxStep;
+            setStep(currentStep);
+          });
+
+          nextBtn.addEventListener("click", () => {
+            currentStep = currentStep < maxStep ? currentStep + 1 : 1;
+            setStep(currentStep);
+          });
+
+          // initialize
+          setStep(currentStep);
+        }
+
+        // ===== Accordion for L2 panel =====
+        const accordionHeaders = document.querySelectorAll(".results-accordion-header");
+
+        accordionHeaders.forEach((header) => {
+          header.addEventListener("click", () => {
+            const item = header.closest(".results-accordion-item");
+            const body = item.querySelector(".results-accordion-body");
+            const icon = header.querySelector(".results-accordion-icon");
+
+            const isOpen = item.classList.contains("open");
+
+            // Close all others (optional "only one open" behavior)
+            document.querySelectorAll(".results-accordion-item.open").forEach((openItem) => {
+              if (openItem !== item) {
+                openItem.classList.remove("open");
+                const openBody = openItem.querySelector(".results-accordion-body");
+                const openIcon = openItem.querySelector(".results-accordion-icon");
+                if (openBody) openBody.style.maxHeight = null;
+                if (openIcon) openIcon.textContent = "+";
+              }
+            });
+
+            if (!isOpen) {
+              item.classList.add("open");
+              body.style.maxHeight = body.scrollHeight + "px";
+              if (icon) icon.textContent = "−";
+            } else {
+              item.classList.remove("open");
+              body.style.maxHeight = null;
+              if (icon) icon.textContent = "+";
+            }
+          });
+        });
+      });
+    </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const coin = document.getElementById("ethics-coin");
+      const fpPanel = document.getElementById("ethics-outcome-fp");
+      const fnPanel = document.getElementById("ethics-outcome-fn");
+
+      if (!coin || !fpPanel || !fnPanel) return;
+
+      let flipping = false;
+
+      function showPanel(type) {
+        fpPanel.classList.remove("active");
+        fnPanel.classList.remove("active");
+
+        if (type === "fp") {
+          fpPanel.classList.add("active");
+        } else if (type === "fn") {
+          fnPanel.classList.add("active");
+        }
+      }
+
+      // Initialize (e.g., show FP by default)
+      coin.classList.add("show-fp");
+      showPanel("fp");
+
+      coin.addEventListener("click", () => {
+        if (flipping) return;
+        flipping = true;
+
+        // Reset panels while flipping
+        fpPanel.classList.remove("active");
+        fnPanel.classList.remove("active");
+
+        coin.classList.remove("show-fp", "show-fn");
+
+        // Force reflow so the flip animation restarts cleanly
+        void coin.offsetWidth;
+
+        coin.classList.add("is-flipping");
+
+        setTimeout(() => {
+          const landingFP = Math.random() < 0.5;
+
+          coin.classList.remove("is-flipping");
+
+          if (landingFP) {
+            coin.classList.add("show-fp");
+            showPanel("fp");
+          } else {
+            coin.classList.add("show-fn");
+            showPanel("fn");
+          }
+
+          flipping = false;
+        }, 1000); // match @keyframes duration
+      });
+    });
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const slider = document.getElementById("errorTradeoffSlider");
+      const focusModeSpan = document.getElementById("ethicsFocusMode");
+      const thresholdSpan = document.getElementById("ethicsThreshold");
+      const panelFP = document.getElementById("ethicsPanelFP");
+      const panelFN = document.getElementById("ethicsPanelFN");
+
+      if (!slider || !focusModeSpan || !thresholdSpan || !panelFP || !panelFN) {
+        return;
+      }
+
+      function updateTradeoff(value) {
+        const v = typeof value === "number" ? value : parseInt(slider.value || "50", 10);
+        const clamped = Math.min(Math.max(v, 0), 100);
+        const threshold = (clamped / 100).toFixed(2);
+
+        thresholdSpan.textContent = threshold;
+
+        // Determine mode
+        let mode;
+        if (clamped < 40) {
+          mode = "fp";
+          focusModeSpan.textContent = "More cautious about false positives";
+        } else if (clamped > 60) {
+          mode = "fn";
+          focusModeSpan.textContent = "More cautious about false negatives";
+        } else {
+          mode = "balanced";
+          focusModeSpan.textContent = "Balanced (50/50)";
+        }
+
+        // Update panel emphasis
+        panelFP.classList.remove("ethics-panel-primary");
+        panelFN.classList.remove("ethics-panel-primary");
+
+        if (mode === "fp") {
+          panelFP.classList.add("ethics-panel-primary");
+        } else if (mode === "fn") {
+          panelFN.classList.add("ethics-panel-primary");
+        } else {
+          // Balanced: gently emphasize both
+          panelFP.classList.add("ethics-panel-primary");
+          panelFN.classList.add("ethics-panel-primary");
+        }
+      }
+
+      slider.addEventListener("input", () => updateTradeoff());
+
+      // Initialize at 50 (coin-flip baseline)
+      updateTradeoff(50);
+    });
+  </script>
+
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // ===== Limitations flipbook (simple fade) =====
+        const ethicsStepCards = document.querySelectorAll(".ethics-step-card");
+        const ethicsStepDots = document.querySelectorAll(".ethics-step-dot");
+
+        function setEthicsStep(step) {
+          ethicsStepCards.forEach((card) => {
+            card.classList.toggle(
+              "active",
+              card.dataset.ethicsStep === String(step)
+            );
+          });
+          ethicsStepDots.forEach((dot) => {
+            dot.classList.toggle(
+              "active",
+              dot.dataset.ethicsStepTarget === String(step)
+            );
+          });
+        }
+
+        if (ethicsStepCards.length && ethicsStepDots.length) {
+          ethicsStepDots.forEach((dot) => {
+            dot.addEventListener("click", () => {
+              const target = parseInt(dot.dataset.ethicsStepTarget || "1", 10);
+              setEthicsStep(target);
+            });
+          });
+          // initialize
+          setEthicsStep(1);
+        }
+
+        // ===== False positive / false negative slider =====
+        const slider = document.getElementById("errorTradeoffSlider");
+        const emphasisLabel = document.getElementById("errorEmphasisLabel");
+        const fpPanel = document.querySelector(".ethics-error-panel--fp");
+        const fnPanel = document.querySelector(".ethics-error-panel--fn");
+
+        function updateErrorEmphasis() {
+          if (!slider || !emphasisLabel || !fpPanel || !fnPanel) return;
+          const value = parseInt(slider.value || "50", 10);
+
+          // clear previous emphasis
+          fpPanel.classList.remove("emphasis");
+          fnPanel.classList.remove("emphasis");
+
+          if (value <= 30) {
+            emphasisLabel.textContent = "Prioritize avoiding false positives";
+            fpPanel.classList.add("emphasis");
+          } else if (value >= 70) {
+            emphasisLabel.textContent = "Prioritize avoiding false negatives";
+            fnPanel.classList.add("emphasis");
+          } else {
+            emphasisLabel.textContent = "Balanced treatment of errors";
+          }
+        }
+
+        if (slider) {
+          slider.addEventListener("input", updateErrorEmphasis);
+          updateErrorEmphasis();
+        }
+      });
+    </script>
+
+    <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const triggers = document.querySelectorAll(".ethics-accordion-trigger");
+    const panels = {
+      fp: document.getElementById("ethics-panel-fp"),
+      fn: document.getElementById("ethics-panel-fn"),
+    };
+
+    // --- ACCORDION LOGIC (click to open/close, only one open) ---
+    triggers.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.target;
+        const panel = panels[target];
+        const isOpen = panel.classList.contains("active");
+
+        // Close everything
+        triggers.forEach((otherBtn) => {
+          otherBtn.classList.remove("active");
+          const chev = otherBtn.querySelector(".ethics-accordion-chevron");
+          if (chev) chev.textContent = "▸";
+        });
+        Object.values(panels).forEach((p) => p.classList.remove("active"));
+
+        // If the clicked one was closed, open it
+        if (!isOpen) {
+          btn.classList.add("active");
+          panel.classList.add("active");
+          const chev = btn.querySelector(".ethics-accordion-chevron");
+          if (chev) chev.textContent = "▾";
+        }
+      });
+    });
+
+    // --- SLIDER EMPHASIS LOGIC (glow the folded header) ---
+    const slider = document.getElementById("ethics-error-slider");
+    const fpTrigger = document.querySelector('.ethics-accordion-trigger[data-target="fp"]');
+    const fnTrigger = document.querySelector('.ethics-accordion-trigger[data-target="fn"]');
+
+    function updateSliderGlow(value) {
+      const v = Number(value);
+
+      // Clear emphasis first
+      fpTrigger?.classList.remove("emphasis");
+      fnTrigger?.classList.remove("emphasis");
+
+      // < 40 => emphasize false positives (more flags)
+      if (v < 40 && fpTrigger) {
+        fpTrigger.classList.add("emphasis");
+      }
+      // > 60 => emphasize false negatives (more misses)
+      else if (v > 60 && fnTrigger) {
+        fnTrigger.classList.add("emphasis");
+      }
+      // Between 40 and 60 => no strong emphasis; both neutral
+    }
+
+    if (slider && fpTrigger && fnTrigger) {
+      // Initialize glow based on default slider value
+      updateSliderGlow(slider.value);
+
+      slider.addEventListener("input", (e) => {
+        updateSliderGlow(e.target.value);
+      });
+    }
+  });
+</script>
+
+
+
+</body>
+</html>
