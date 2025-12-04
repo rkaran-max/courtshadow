@@ -12,7 +12,6 @@
     rel="stylesheet"
   />
 
-  <!-- MathJax config (bigger LaTeX) -->
   <script>
     window.MathJax = {
       tex: {
@@ -32,8 +31,7 @@
   ></script>
 </head>
 <body>
-  <!-- HEADER / NAV -->
-  <header class="site-header">
+ <header class="site-header">
     <div class="container nav-container">
       <div class="logo">
         <span class="logo-accent">CourtShadow</span>
@@ -54,9 +52,7 @@
   </header>
 
   <main>
-    <!-- HERO / OVERVIEW -->
     <section id="overview" class="section hero">
-      <!-- animated background layers -->
       <div class="hero-gradient-layer"></div>
       <div class="hero-reflection-layer"></div>
 
@@ -122,7 +118,7 @@
               <div class="metric">
                 <div class="metric-label">Accuracy</div>
                 <div class="metric-value">87.5%</div>
-                <div class="metric-caption">case-level on test set</div>
+                <div class="metric-caption">chunk-level on test set</div>
               </div>
               <div class="metric">
                 <div class="metric-label">ROC AUC</div>
@@ -132,14 +128,13 @@
             </div>
 
             <div class="hero-mini-caption">
-              <span class="pill-soft">Case-level view</span>
+              <span class="pill-soft">Chunk-level view</span>
               <span>
-                Linguistic Environment Scores decomposed into text, context, and role features.
+                Linguistic Environment Scores (LES) decomposed into text, context, and role features.
               </span>
             </div>
           </div>
 
-          <!-- MATCHING GRADIENT CARD FOR "What CourtShadow reveals" -->
           <div class="hero-card hero-card-main floating-card delay-1 reveal-on-scroll">
             <div class="hero-card-header">
               <span class="hero-card-label">What CourtShadow reveals</span>
@@ -155,11 +150,9 @@
       </div>
     </section>
 
-    <!-- METHODS -->
     <section id="methods" class="section reveal-on-scroll">
       <div class="container">
 
-        <!-- Fancy methods header -->
         <div class="methods-header">
           <div class="methods-kicker">Methods</div>
           <h2>Data &amp; Methods</h2>
@@ -171,21 +164,19 @@
           </p>
         </div>
 
-        <!-- METHODS CARDS GRID WRAPPER (for spacing) -->
         <div class="methods-cards-grid">
-          <!-- DATASET (full-width card) -->
           <div class="card methods-card">
-            <div class="methods-subtitle">Dataset construction</div>
-            <h3>Dataset construction</h3>
-            <ul class="nice-list">
-              <li>Collected <strong>42</strong> publicly-available criminal trial transcripts.</li>
-              <li>Applied case-level group coding (POC-coded vs white-coded) using external research sources.</li>
-              <li>Split transcripts into smaller <strong>linguistic segments</strong> based on speaker turns and text length.</li>
-              <li>Merged in speaker roles (judge, prosecutor, defense, witness, defendant).</li>
-            </ul>
+              <div class="methods-card methods-card--first">
+                <div class="methods-subtitle">Dataset construction</div>
+                <h3>Dataset construction</h3>
+                <ul class="nice-list">
+                  <li>Collected <strong>42</strong> publicly-available criminal trial transcripts.</li>
+                  <li>Applied case-level group coding (POC-coded vs white-coded) using external research sources.</li>
+                  <li>Split transcripts into smaller <strong>linguistic segments</strong> based on speaker turns and text length.</li>
+                  <li>Merged in speaker roles (judge, prosecutor, defense, witness, defendant).</li>
+                </ul>
           </div>
 
-          <!-- PIPELINE (full-width card) -->
           <div class="card methods-card">
             <div class="methods-subtitle">Modeling the environment</div>
             <h3>Model pipeline</h3>
@@ -200,7 +191,6 @@
             <div class="pipeline-card">
               <div class="pipeline-flow">
 
-                <!-- Step 1 -->
                 <div class="pipeline-step">
                   <div class="pipeline-step-number">1</div>
                   <h4 class="pipeline-step-title">Chunk transcripts</h4>
@@ -212,7 +202,6 @@
 
                 <div class="pipeline-arrow" aria-hidden="true">➜</div>
 
-                <!-- Step 2 -->
                 <div class="pipeline-step">
                   <div class="pipeline-step-number">2</div>
                   <h4 class="pipeline-step-title">Featurize segments</h4>
@@ -224,7 +213,6 @@
 
                 <div class="pipeline-arrow" aria-hidden="true">➜</div>
 
-                <!-- Step 3 -->
                 <div class="pipeline-step">
                   <div class="pipeline-step-number">3</div>
                   <h4 class="pipeline-step-title">Train logistic regression</h4>
@@ -236,7 +224,6 @@
 
                 <div class="pipeline-arrow" aria-hidden="true">➜</div>
 
-                <!-- Step 4 -->
                 <div class="pipeline-step">
                   <div class="pipeline-step-number">4</div>
                   <h4 class="pipeline-step-title">Predict on test cases</h4>
@@ -248,12 +235,11 @@
 
                 <div class="pipeline-arrow" aria-hidden="true">➜</div>
 
-                <!-- Step 5 -->
                 <div class="pipeline-step">
                   <div class="pipeline-step-number">5</div>
                   <h4 class="pipeline-step-title">Aggregate &amp; decompose</h4>
                   <p class="pipeline-step-body">
-                    Aggregate segment predictions into <strong>case-level bias scores</strong>
+                    Aggregate segment predictions into <strong>case-level Linguistic Environment Scores (LBS)</strong>
                     and decompose contributions by feature family (text, context, roles/meta).
                   </p>
                 </div>
@@ -263,7 +249,6 @@
           </div>
         </div>
 
-        <!-- Animated transcript-to-model strip -->
         <div class="methods-animation-band reveal-on-scroll">
           <div class="methods-animation-inner">
 
@@ -277,7 +262,6 @@
             </div>
 
             <div class="methods-rail">
-              <!-- Left: raw transcript snippets -->
               <div class="methods-column methods-column--left">
                 <div class="methods-column-title">Transcript segments</div>
 
@@ -301,7 +285,6 @@
                 </div>
               </div>
 
-              <!-- Middle: feature extraction chips -->
               <div class="methods-column methods-column--middle">
                 <div class="methods-column-title">Segment features</div>
 
@@ -329,7 +312,6 @@
                 </div>
               </div>
 
-              <!-- Right: model outputs -->
               <div class="methods-column methods-column--right">
                 <div class="methods-column-title">Model signal</div>
 
@@ -353,15 +335,13 @@
           </div>
         </div>
 
-        <!-- FEATURE FAMILIES CARD -->
         <div class="card features-card reveal-on-scroll">
-          <div class="methods-subtitle">Feature families</div>
-          <h3>Feature families</h3>
+          <div class="methods-subtitle">Understanding the Score</div>
+          <h3>What comprises the Linguistic Environment Score (LES)?</h3>
           <p class="small-muted">
-            CourtShadow uses 38 linguistically interpretable features per segment. Use the tabs to flip through how each family works, with examples and rationale.
+            CourtShadow's LES can be decomposed into 38 linguistically interpretable features per segment. Use the tabs to flip through how each feature family works, with examples and rationale.
           </p>
 
-          <!-- Tabs -->
           <div class="feature-tabs">
             <button class="feature-tab active" data-feature-tab="overview">Overview</button>
             <button class="feature-tab" data-feature-tab="length">Length &amp; structure</button>
@@ -370,10 +350,8 @@
             <button class="feature-tab" data-feature-tab="topics">Topic indicators</button>
           </div>
 
-          <!-- Slides -->
           <div class="feature-slides">
 
-            <!-- Slide 1: Overview with animated bar graph -->
             <div class="feature-slide active" data-feature-slide="overview">
               <div class="feature-slide-grid">
                 <div>
@@ -423,12 +401,11 @@
                   </ul>
 
                   <p class="small-muted">
-                    Together, these families let CourtShadow focus on how cases are structured and described,
+                    Together, these families allow CourtShadow to focus on <em>how</em> cases are structured and described,
                     rather than on any explicit mention of group identity.
                   </p>
                 </div>
 
-                <!-- Animated bar chart: counts + labels -->
                 <div class="feature-bars">
                   <div class="feature-bar" data-count="3">
                     <div class="feature-bar-inner">
@@ -461,14 +438,13 @@
               </div>
             </div>
 
-            <!-- Slide 2: Length & structure -->
             <div class="feature-slide feature-slide--length" data-feature-slide="length">
               <div class="feature-slide-grid">
                 <div>
                   <h4>Length &amp; structure (3 features)</h4>
                   <p>
-                    These features capture how dense and structurally complex each segment is. They
-                    don’t look at <em>what</em> is being said, but <em>how</em> it is packaged in the transcript:
+                    These features capture how dense and structurally complex each segment is. Rather than
+                    looking at <em>what</em> is being said, these features examine <em>how</em> text is packaged in the transcript:
                   </p>
                   <ul class="nice-list compact">
                     <li>
@@ -477,7 +453,7 @@
                     </li>
                     <li>
                       <strong>chunk_sentences</strong> — approximate sentence count, using
-                      <code>.</code>, <code>!</code>, and <code>?</code> as boundaries.
+                      <code>.</code>, <code>!</code>, and <code>?</code> markers as boundaries.
                     </li>
                     <li>
                       <strong>chunk_question_marks</strong> — number of question marks, as a proxy
@@ -513,8 +489,8 @@
                   </div>
 
                   <p class="small-muted length-note">
-                    CourtShadow doesn’t “read” these as stories. It treats them as structured turns
-                    whose lengths and punctuation patterns help signal presentation style.
+                    CourtShadow doesn’t “read” these exchanges as a narrative. It instead treats them as structured turns
+                    whose lengths and punctuation patterns help to signal presentation style.
                   </p>
                 </div>
 
@@ -522,11 +498,11 @@
                   <div class="length-sidecard">
                     <p class="small-muted">
                       <strong>Why include this family?</strong><br />
-                      Prior work on courtroom presentation shows that the way speech is structured —
-                      how long a witness or lawyer talks, and how often they ask questions — can signal
+                      Prior work on courtroom presentation demonstrates that the way in which speech is structured (i.e., how
+                      long a witness or lawyer talks, how often they ask questions) may offer insight into
                       control, pressure, and credibility. These simple length and punctuation features
-                      let CourtShadow pick up on that structural side of the transcript without using
-                      any information about defendant identity.
+                      allow CourtShadow to analyze the structural side of the transcript without using
+                      any information about the defendant's identity.
                     </p>
 
                     <div class="feature-cta">
@@ -541,7 +517,6 @@
               </div>
             </div>
 
-            <!-- Slide 3: Discursive framing -->
             <div class="feature-slide feature-slide--framing" data-feature-slide="framing">
               <div class="feature-slide-grid">
                 <div>
@@ -557,7 +532,6 @@
                     <li><strong>Certainty / uncertainty:</strong> “clearly”, “obviously” vs. “maybe”, “might”, “unclear”.</li>
                   </ul>
 
-                  <!-- Visual examples -->
                   <div class="feature-visual feature-visual-framing">
                     <div class="length-example">
                       <p class="example-title">Polite / mitigating</p>
@@ -616,7 +590,6 @@
               </div>
             </div>
 
-            <!-- Slide 4: Pronouns & voice -->
             <div class="feature-slide feature-slide--pronouns" data-feature-slide="pronouns">
               <div class="feature-slide-grid">
                 <div>
@@ -629,7 +602,6 @@
                     <li><strong>second_person_total / rate:</strong> “you, your, yours…”</li>
                   </ul>
 
-                  <!-- Visual examples -->
                   <div class="feature-visual feature-visual-pronouns">
                     <div class="length-example">
                       <p class="example-title">Defendant voice</p>
@@ -683,7 +655,6 @@
               </div>
             </div>
 
-            <!-- Slide 5: Topic indicators -->
             <div class="feature-slide feature-slide--topics" data-feature-slide="topics">
               <div class="feature-slide-grid">
                 <div>
@@ -700,7 +671,6 @@
                     <li><strong>Harm &amp; injury:</strong> victim, injury, hospital.</li>
                   </ul>
 
-                  <!-- Visual example -->
                   <div class="feature-visual feature-visual-topics">
                     <div class="length-example">
                       <p class="example-title">Example segment</p>
@@ -744,27 +714,24 @@
               </div>
             </div>
 
-          </div> <!-- end .feature-slides -->
-        </div> <!-- end .features-card -->
+          </div>
+        </div>
 
       </div>
 
-      <!-- MATH SNAPSHOT -->
       <section class="math-snapshot reveal-on-scroll">
         <div class="card math-card">
-          <div class="methods-subtitle">Mathematical snapshot</div>
+          <div class="methods-subtitle">Understanding the Math Behind the Model</div>
           <h3>Mathematical snapshot</h3>
           <p class="section-lead small-muted">
             A high-level overview of the probabilistic and optimization framework behind CourtShadow’s
             segment-level classifier and case-level aggregation.
           </p>
 
-          <!-- Grid -->
           <div class="math-grid">
 
-            <!-- Bernoulli model -->
             <div class="math-block">
-              <h4>Bernoulli modeling</h4>
+              <h4>Bernoulli Modeling</h4>
               <p>
                 Each segment label \( y_i \in \{0,1\} \) is treated as a Bernoulli random variable indicating
                 whether segment \(i\) comes from a case pre-coded into Group&nbsp;1 (e.g., POC-coded) or Group&nbsp;0 (white-coded).
@@ -780,9 +747,8 @@
               </p>
             </div>
 
-            <!-- Logistic regression -->
             <div class="math-block">
-              <h4>Logistic regression</h4>
+              <h4>Logistic Regression</h4>
               <p>
                 CourtShadow uses a logistic link function to map features to probabilities:
                 \[
@@ -800,9 +766,8 @@
               </p>
             </div>
 
-            <!-- Case-level -->
             <div class="math-block">
-              <h4>Case-level aggregation</h4>
+              <h4>Case-level Aggregation</h4>
               <p>
                 For each case, segment-level probabilities are aggregated into a single case-level
                 Linguistic Environment Score:
@@ -818,9 +783,8 @@
               </p>
             </div>
 
-            <!-- Diagnostics -->
             <div class="math-block">
-              <h4>Model evaluation</h4>
+              <h4>Model Evaluation</h4>
               <p>
                 The Receiver Operating Characteristic (ROC) area under the curve (AUC) measures the model’s
                 ranking ability:
@@ -843,8 +807,7 @@
       </section>
     </section>
 
-    <!-- INTERPRETABILITY SECTION -->
-        <!-- INTERPRETABILITY SECTION -->
+
     <section id="interpretability" class="section section-muted reveal-on-scroll">
       <div class="container">
         <h2>What drives CourtShadow’s scores?</h2>
@@ -856,7 +819,6 @@
         </p>
 
         <div class="interpret-grid">
-          <!-- POC-coded example: The Wilmington Ten -->
             <div class="card interpret-card floating-card">
               <div class="interpret-header">
                 <span class="interpret-kicker">High-LES POC-coded case</span>
@@ -868,7 +830,6 @@
                 </p>
               </div>
 
-              <!-- IMAGE FLOAT + LINKS UNDER IMAGE -->
               <div class="interpret-meta">
                 <div class="interpret-image-wrapper">
                   <img
@@ -904,7 +865,6 @@
                   </ul>
                 </div>
 
-                <!-- TEXT THAT WRAPS AROUND IMAGE -->
                 <div class="interpret-meta-text">
                   <p class="small-muted">
                     <strong>Case snapshot.</strong> A group of civil rights activists prosecuted in
@@ -982,7 +942,6 @@
               </div>
             </div>
 
-        <!-- White-coded example: United States v. Cohen -->
         <div class="card interpret-card floating-card">
           <div class="interpret-header">
             <span class="interpret-kicker">Low-LES white-coded case</span>
@@ -994,7 +953,6 @@
             </p>
           </div>
 
-          <!-- IMAGE FLOAT + LINKS UNDER IMAGE -->
           <div class="interpret-meta">
             <div class="interpret-image-wrapper">
               <img
@@ -1030,7 +988,6 @@
               </ul>
             </div>
 
-            <!-- TEXT THAT WRAPS AROUND IMAGE -->
             <div class="interpret-meta-text">
               <p class="small-muted">
                 <strong>Case snapshot.</strong> Federal prosecution of Michael Cohen on
@@ -1145,7 +1102,6 @@
     </section>
 
 
-    <!-- RESULTS / MODEL EVALUATION -->
     <section id="results" class="section section-muted">
       <div class="container">
         <h2>Model Evaluation &amp; Key Results</h2>
@@ -1156,12 +1112,10 @@
         </p>
 
         <div class="results-grid">
-          <!-- METRICS CARD -->
           <div class="card results-metrics-card results-metrics-card--howto">
             <h3>Overall performance</h3>
 
             <div class="results-metrics">
-              <!-- Chunk-level accuracy -->
               <div class="results-metric results-metric--glow results-metric--chunk-acc">
                 <div class="results-metric-label">Chunk-level accuracy</div>
                 <div class="results-metric-value">87.5%</div>
@@ -1170,7 +1124,6 @@
                 </div>
               </div>
 
-              <!-- Chunk-level AUC -->
               <div class="results-metric results-metric--glow results-metric--chunk-auc">
                 <div class="results-metric-label">
                   Chunk-level ROC AUC
@@ -1181,7 +1134,6 @@
                 </div>
               </div>
 
-              <!-- Case-level accuracy (keep as “highlight” + glow) -->
               <div class="results-metric results-metric--glow results-metric--case-acc results-metric--highlight">
                 <div class="results-metric-label">Case-level accuracy</div>
                 <div class="results-metric-value">100%</div>
@@ -1192,7 +1144,6 @@
                 </div>
               </div>
 
-              <!-- Case-level AUC -->
               <div class="results-metric results-metric--glow results-metric--case-auc">
                 <div class="results-metric-label">Case-level ROC AUC</div>
                 <div class="results-metric-value">1.00</div>
@@ -1214,7 +1165,6 @@
             </p>
           </div>
 
-          <!-- EXPLANATION CARD -->
           <div class="card results-metrics-card results-metrics-card--howto">
             <h3>How to read these numbers</h3>
             <p>
@@ -1256,9 +1206,7 @@
           </div>
         </div>
 
-        <!-- VISUALS GRID -->
         <div class="results-visuals-grid results-visuals-grid--wide">
-          <!-- CONFUSION MATRICES -->
           <figure class="plot-card plot-card-dark plot-card--large reveal-on-scroll">
             <div class="plot-card-header">
               <h3>Chunk vs. case-level confusion</h3>
@@ -1290,7 +1238,6 @@
             </div>
           </figure>
 
-          <!-- CALIBRATION CURVE -->
           <figure class="plot-card plot-card-dark reveal-on-scroll">
             <div class="plot-card-header">
               <h3>Case-level calibration</h3>
@@ -1311,7 +1258,6 @@
             </figcaption>
           </figure>
 
-          <!-- LES DISTRIBUTION (UPDATED TO TEST CASES) -->
           <figure class="plot-card plot-card-dark reveal-on-scroll">
             <div class="plot-card-header">
               <h3>LES distribution (test cases)</h3>
@@ -1333,7 +1279,6 @@
           </figure>
         </div>
 
-        <!-- MODEL EVALUATION CHECKS (TABBED / DE-CHUNKED) -->
         <div class="card results-eval-card reveal-on-scroll" style="margin-top: 2.25rem;">
           <div class="results-eval-header">
             <h3>Model Evaluation: Baselines &amp; L2 Regularization</h3>
@@ -1343,7 +1288,6 @@
             </p>
           </div>
 
-          <!-- Tabs for baselines vs. L2 -->
           <div class="results-eval-tabs">
             <button class="results-eval-tab active" data-eval-tab="baselines">
               Baseline checks
@@ -1354,12 +1298,10 @@
           </div>
 
           <div class="results-eval-panels">
-            <!-- ===================== BASELINES PANEL (FLIPBOOK) ===================== -->
             <div class="results-eval-panel active" data-eval-panel="baselines">
               <div class="results-eval-section">
                 <h4>Baseline comparisons</h4>
 
-                <!-- Stepper / flipbook controls -->
                 <div class="results-stepper">
                   <div class="results-step-nav">
                     <button class="results-step-dot active" data-step-target="1">1</button>
@@ -1368,7 +1310,6 @@
                   </div>
 
                   <div class="results-step-cards">
-                    <!-- Step 1 -->
                     <article class="results-step-card active" data-step="1">
                       <h5 class="results-step-title">Majority-class baseline (chunks)</h5>
                       <p>
@@ -1386,7 +1327,6 @@
                       </p>
                     </article>
 
-                    <!-- Step 2 -->
                     <article class="results-step-card" data-step="2">
                       <h5 class="results-step-title">Random-chance intuition</h5>
                       <p>
@@ -1404,7 +1344,6 @@
                       </p>
                     </article>
 
-                    <!-- Step 3 -->
                     <article class="results-step-card" data-step="3">
                       <h5 class="results-step-title">Case-level performance vs. baselines</h5>
                       <p>
@@ -1436,7 +1375,6 @@
               </div>
             </div>
 
-            <!-- ===================== L2 PANEL (ACCORDION) ===================== -->
             <div class="results-eval-panel" data-eval-panel="l2">
               <div class="results-eval-section results-eval-section--l2">
                 <h4>L2 regularization: stabilizing a small-N model</h4>
@@ -1448,7 +1386,6 @@
                 </p>
 
                 <div class="results-accordion">
-                  <!-- Item 1 -->
                   <div class="results-accordion-item">
                     <button class="results-accordion-header" type="button">
                       <span>Why regularization?</span>
@@ -1468,7 +1405,6 @@
                     </div>
                   </div>
 
-                  <!-- Item 2 -->
                   <div class="results-accordion-item">
                     <button class="results-accordion-header" type="button">
                       <span>The math</span>
@@ -1504,7 +1440,6 @@
                     </div>
                   </div>
 
-                  <!-- Item 3 -->
                   <div class="results-accordion-item">
                     <button class="results-accordion-header" type="button">
                       <span>Choosing \(\lambda\)</span>
@@ -1527,7 +1462,6 @@
                     </div>
                   </div>
 
-                  <!-- Item 4 -->
                   <div class="results-accordion-item">
                     <button class="results-accordion-header" type="button">
                       <span>Result</span>
@@ -1560,7 +1494,6 @@
         </div>
 
 
-        <!-- L2 REGULARIZATION VISUAL (IMAGE IN SAME FOLDER) -->
         <figure class="plot-card plot-card-dark reveal-on-scroll" style="margin-top: 2rem;">
           <div class="plot-card-header">
             <h3>Effect of L2 regularization</h3>
@@ -1570,7 +1503,6 @@
             </p>
           </div>
 
-          <!-- DARK-THEME WRAPPER AROUND THE PLOT -->
           <div class="plot-image-wrapper l2-plot-wrapper">
             <img
               src="l2_regularization_curve.png"
@@ -1588,8 +1520,6 @@
           </figcaption>
         </figure>
      </section>
-
-      <!-- ETHICS (now first) -->
       <section id="ethics" class="section section-muted reveal-on-scroll ethics-section">
         <div class="container">
           <div class="ethics-header">
@@ -1602,14 +1532,12 @@
           </div>
 
           <div class="ethics-grid">
-            <!-- LEFT: LIMITATIONS (FLIPBOOK WITH PILL TABS) -->
             <article class="card ethics-card ethics-card--limits">
               <div class="ethics-card-header">
                 <span class="ethics-tag">Model limitations</span>
                 <h3>How to read CourtShadow responsibly</h3>
               </div>
 
-              <!-- Pill tabs -->
               <div class="ethics-stepper">
                 <div class="ethics-step-dots">
                   <button class="ethics-step-dot active" data-ethics-step-target="1">
@@ -1624,7 +1552,6 @@
                 </div>
 
                 <div class="ethics-step-cards">
-                  <!-- STEP 1 -->
                   <article class="ethics-step-card active" data-ethics-step="1">
                     <h4 class="ethics-step-title">Small-N, skewed sample</h4>
                     <p>
@@ -1640,7 +1567,6 @@
                     </p>
                   </article>
 
-                  <!-- STEP 2 -->
                   <article class="ethics-step-card" data-ethics-step="2">
                     <h4 class="ethics-step-title">What the model can and cannot see</h4>
                     <p>
@@ -1660,7 +1586,6 @@
                     </p>
                   </article>
 
-                  <!-- STEP 3 -->
                   <article class="ethics-step-card" data-ethics-step="3">
                     <h4 class="ethics-step-title">Not a diagnostic or decision tool</h4>
                     <p>
@@ -1682,9 +1607,8 @@
                   </article>
                 </div>
               </div>
-              </article> <!-- end first ethics card (limitations card) -->
+              </article>
 
-      <!-- ERRORS & THRESHOLDS CARD -->
       <article class="ethics-card ethics-card--errors">
         <div class="ethics-card-header">
           <span class="ethics-tag ethics-tag--accent">Error tradeoffs</span>
@@ -1698,7 +1622,6 @@
           Even so, <strong>different kinds of mistakes hurt different people.</strong>
         </p>
 
-        <!-- Slider block -->
         <div class="ethics-slider-block">
           <label class="ethics-slider-label" for="ethics-error-slider">
             Adjust the model’s operating threshold:
@@ -1720,10 +1643,8 @@
 
         </div>
 
-        <!-- Accordion -->
         <div class="ethics-accordion">
 
-      <!-- FALSE POSITIVES -->
       <button
         class="ethics-accordion-trigger"
         data-target="fp"
@@ -1757,7 +1678,6 @@
         </p>
       </div>
 
-      <!-- FALSE NEGATIVES -->
       <button
         class="ethics-accordion-trigger"
         data-target="fn"
@@ -1799,13 +1719,12 @@
           setting to study <em>structural</em> patterns in language, not to make
           decisions about individuals.
         </p>
-      </article> <!-- end errors card -->
+      </article>
 
-    </div> <!-- end .ethics-grid -->
-  </div> <!-- end .container -->
-</section> <!-- end #ethics -->
+    </div>
+  </div>
+</section>
 
-      <!-- KEY FINDINGS / MAIN TAKEAWAYS (now after ethics) -->
       <section id="findings" class="section reveal-on-scroll">
         <div class="container">
           <h2>Main takeaways</h2>
@@ -1818,7 +1737,6 @@
           </p>
 
           <div class="two-column takeaways-grid">
-            <!-- LEFT: IMPACT + SUBSTANTIVE FINDINGS -->
             <div>
               <div class="card highlight-card">
                 <h3>1. Court records encode institutional patterns</h3>
@@ -1880,7 +1798,6 @@
               </div>
             </div>
 
-            <!-- RIGHT: CS109 CONCEPTS + CREATIVITY + NEXT STEPS -->
             <div>
               <div class="card highlight-card cs109-math-small">
                 <h3>CS109 concepts in action</h3>
@@ -1981,19 +1898,16 @@
         </div>
       </section>
 
-      <!-- REAL-WORLD APPLICATIONS (now last before About) -->
       <section
         id="applications"
         class="section section-muted reveal-on-scroll applications-section"
       >
-        <!-- Animated background for this section only -->
         <div class="applications-bg">
           <div class="applications-bg-ring"></div>
           <div class="applications-bg-gradient"></div>
         </div>
 
         <div class="container applications-inner">
-          <!-- Header + intro -->
           <div class="applications-header">
             <h2 class="applications-title">Real-world Applications</h2>
             <p class="section-lead">
@@ -2008,9 +1922,7 @@
             </p>
           </div>
 
-          <!-- CARDS GRID: 3 CARDS ON ONE LINE -->
           <div class="applications-cards-grid">
-            <!-- CARD 1: RJA SPOTLIGHT -->
             <article class="card applications-card applications-card--rja floating-card">
               <div class="applications-card-glow"></div>
               <div class="applications-card-header">
@@ -2044,7 +1956,6 @@
               </p>
             </article>
 
-            <!-- CARD 2: HOW COURTSHADOW COULD HELP -->
             <article class="card applications-card applications-card--support floating-card">
               <div class="applications-card-glow"></div>
               <div class="applications-card-header">
@@ -2086,7 +1997,6 @@
               </div>
             </article>
 
-            <!-- CARD 3: HISTORICAL ARC -->
             <article class="card applications-card applications-card--history floating-card">
               <div class="applications-card-glow"></div>
               <div class="applications-card-header">
@@ -2114,7 +2024,6 @@
             </article>
           </div>
 
-          <!-- Thin animated ribbon tying back to the “wave” -->
           <div class="applications-ribbon">
             <div class="applications-ribbon-gradient"></div>
             <p class="applications-ribbon-text small-muted">
@@ -2125,9 +2034,7 @@
         </div>
       </section>
 
-      <!-- ABOUT (cutesy card with avatar) -->
-            <!-- ABOUT (cutesy card with avatar) -->
-      <section id="about" class="about-section section reveal-on-scroll">
+            <section id="about" class="about-section section reveal-on-scroll">
         <div class="container">
           <div class="about-card card">
 
@@ -2163,7 +2070,6 @@
 
 
 
-  <!-- FOOTER -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <span>© 2025 CourtShadow · CS109 Final Project</span>
@@ -2171,7 +2077,6 @@
     </div>
   </footer>
 
-  <!-- SCROLL REVEAL + FLIP SCRIPT -->
   <script>
     const revealEls = document.querySelectorAll(".reveal-on-scroll");
     const flipEls = document.querySelectorAll(".reveal-flip");
@@ -2197,7 +2102,6 @@
     flipEls.forEach((el) => observer.observe(el));
   </script>
 
-  <!-- SCROLL WAVE -->
   <script>
     (function () {
       function updateMaxScroll() {
@@ -2208,7 +2112,7 @@
 
       function updateWave() {
         maxScroll = Math.max(updateMaxScroll(), 1);
-        const progress = window.scrollY / maxScroll; // 0 → bottom, 1
+        const progress = window.scrollY / maxScroll;
         const clamped = Math.min(Math.max(progress, 0), 1);
         document.body.style.setProperty("--wave-progress", clamped.toFixed(4));
       }
@@ -2219,12 +2123,10 @@
         updateWave();
       });
 
-      // initial position
       updateWave();
     })();
   </script>
 
-  <!-- INTERPRETABILITY BARS ANIMATION -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const cards = document.querySelectorAll(".interpret-card");
@@ -2255,7 +2157,6 @@
     });
   </script>
 
-  <!-- FEATURE TABS + BAR ANIMATION -->
       <script>
         document.addEventListener("DOMContentLoaded", () => {
           const tabs = document.querySelectorAll(".feature-tab");
@@ -2266,7 +2167,6 @@
               const isActive = slide.dataset.featureSlide === key;
               slide.classList.toggle("active", isActive);
 
-              // Animate bars only on the overview slide
               if (isActive && key === "overview") {
                 const bars = slide.querySelectorAll(".feature-bar");
                 if (!bars.length) return;
@@ -2282,7 +2182,6 @@
                   const inner = bar.querySelector(".feature-bar-inner");
                   if (!inner) return;
 
-                  // reset so re-clicking animates again
                   inner.classList.remove("filled");
                   inner.style.height = "0%";
 
@@ -2306,12 +2205,10 @@
             });
           });
 
-          // Initialize on overview
           showSlide("overview");
         });
       </script>
 
-      <!-- RESULTS EVAL TABS SCRIPT -->
       <script>
         document.addEventListener("DOMContentLoaded", () => {
           const evalTabs = document.querySelectorAll(".results-eval-tab");
@@ -2340,7 +2237,6 @@
 
         <script>
       document.addEventListener("DOMContentLoaded", () => {
-        // ===== Flipbook / stepper for baseline checks =====
         const stepCards = document.querySelectorAll(".results-step-card");
         const stepDots = document.querySelectorAll(".results-step-dot");
         const prevBtn = document.querySelector(".results-step-prev");
@@ -2377,11 +2273,9 @@
             setStep(currentStep);
           });
 
-          // initialize
           setStep(currentStep);
         }
 
-        // ===== Accordion for L2 panel =====
         const accordionHeaders = document.querySelectorAll(".results-accordion-header");
 
         accordionHeaders.forEach((header) => {
@@ -2392,7 +2286,6 @@
 
             const isOpen = item.classList.contains("open");
 
-            // Close all others (optional "only one open" behavior)
             document.querySelectorAll(".results-accordion-item.open").forEach((openItem) => {
               if (openItem !== item) {
                 openItem.classList.remove("open");
@@ -2438,7 +2331,6 @@
         }
       }
 
-      // Initialize (e.g., show FP by default)
       coin.classList.add("show-fp");
       showPanel("fp");
 
@@ -2446,13 +2338,11 @@
         if (flipping) return;
         flipping = true;
 
-        // Reset panels while flipping
         fpPanel.classList.remove("active");
         fnPanel.classList.remove("active");
 
         coin.classList.remove("show-fp", "show-fn");
 
-        // Force reflow so the flip animation restarts cleanly
         void coin.offsetWidth;
 
         coin.classList.add("is-flipping");
@@ -2471,7 +2361,7 @@
           }
 
           flipping = false;
-        }, 1000); // match @keyframes duration
+        }, 1000);
       });
     });
   </script>
@@ -2495,7 +2385,6 @@
 
         thresholdSpan.textContent = threshold;
 
-        // Determine mode
         let mode;
         if (clamped < 40) {
           mode = "fp";
@@ -2508,7 +2397,6 @@
           focusModeSpan.textContent = "Balanced (50/50)";
         }
 
-        // Update panel emphasis
         panelFP.classList.remove("ethics-panel-primary");
         panelFN.classList.remove("ethics-panel-primary");
 
@@ -2517,7 +2405,6 @@
         } else if (mode === "fn") {
           panelFN.classList.add("ethics-panel-primary");
         } else {
-          // Balanced: gently emphasize both
           panelFP.classList.add("ethics-panel-primary");
           panelFN.classList.add("ethics-panel-primary");
         }
@@ -2525,7 +2412,6 @@
 
       slider.addEventListener("input", () => updateTradeoff());
 
-      // Initialize at 50 (coin-flip baseline)
       updateTradeoff(50);
     });
   </script>
@@ -2533,7 +2419,6 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        // ===== Limitations flipbook (simple fade) =====
         const ethicsStepCards = document.querySelectorAll(".ethics-step-card");
         const ethicsStepDots = document.querySelectorAll(".ethics-step-dot");
 
@@ -2559,11 +2444,9 @@
               setEthicsStep(target);
             });
           });
-          // initialize
           setEthicsStep(1);
         }
 
-        // ===== False positive / false negative slider =====
         const slider = document.getElementById("errorTradeoffSlider");
         const emphasisLabel = document.getElementById("errorEmphasisLabel");
         const fpPanel = document.querySelector(".ethics-error-panel--fp");
@@ -2573,7 +2456,6 @@
           if (!slider || !emphasisLabel || !fpPanel || !fnPanel) return;
           const value = parseInt(slider.value || "50", 10);
 
-          // clear previous emphasis
           fpPanel.classList.remove("emphasis");
           fnPanel.classList.remove("emphasis");
 
@@ -2603,14 +2485,12 @@
       fn: document.getElementById("ethics-panel-fn"),
     };
 
-    // --- ACCORDION LOGIC (click to open/close, only one open) ---
     triggers.forEach((btn) => {
       btn.addEventListener("click", () => {
         const target = btn.dataset.target;
         const panel = panels[target];
         const isOpen = panel.classList.contains("active");
 
-        // Close everything
         triggers.forEach((otherBtn) => {
           otherBtn.classList.remove("active");
           const chev = otherBtn.querySelector(".ethics-accordion-chevron");
@@ -2618,7 +2498,6 @@
         });
         Object.values(panels).forEach((p) => p.classList.remove("active"));
 
-        // If the clicked one was closed, open it
         if (!isOpen) {
           btn.classList.add("active");
           panel.classList.add("active");
@@ -2628,7 +2507,6 @@
       });
     });
 
-    // --- SLIDER EMPHASIS LOGIC (glow the folded header) ---
     const slider = document.getElementById("ethics-error-slider");
     const fpTrigger = document.querySelector('.ethics-accordion-trigger[data-target="fp"]');
     const fnTrigger = document.querySelector('.ethics-accordion-trigger[data-target="fn"]');
@@ -2636,23 +2514,18 @@
     function updateSliderGlow(value) {
       const v = Number(value);
 
-      // Clear emphasis first
       fpTrigger?.classList.remove("emphasis");
       fnTrigger?.classList.remove("emphasis");
 
-      // < 40 => emphasize false positives (more flags)
       if (v < 40 && fpTrigger) {
         fpTrigger.classList.add("emphasis");
       }
-      // > 60 => emphasize false negatives (more misses)
       else if (v > 60 && fnTrigger) {
         fnTrigger.classList.add("emphasis");
       }
-      // Between 40 and 60 => no strong emphasis; both neutral
     }
 
     if (slider && fpTrigger && fnTrigger) {
-      // Initialize glow based on default slider value
       updateSliderGlow(slider.value);
 
       slider.addEventListener("input", (e) => {
@@ -2666,3 +2539,4 @@
 
 </body>
 </html>
+

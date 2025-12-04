@@ -1,6 +1,4 @@
-/* ===========================
-   Base + Layout
-   =========================== */
+
 
 *,
 *::before,
@@ -1126,6 +1124,10 @@ p {
   letter-spacing: 0.15em;
   color: #9ca3af;
   margin-bottom: 0.4rem;
+}
+
+.methods-card--first {
+  margin-bottom: 2.25rem;   /* adjust to taste (2–3rem usually perfect) */
 }
 
 /* ===========================
