@@ -5446,3 +5446,43 @@ p {
   }
 }
 
+/* PROJECT DOCS SECTION */
+.docs-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  margin-top: 2rem;
+}
+
+.doc-card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-frame {
+  width: 100%;
+  height: 320px;
+  margin-top: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.5rem;
+}
+
+.doc-download {
+  margin-top: 1rem;
+  color: #a5b4fc;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: 0.2s ease;
+}
+
+.doc-download:hover {
+  border-bottom: 1px solid #a5b4fc;
+}
+
+
